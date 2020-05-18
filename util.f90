@@ -1,0 +1,105 @@
+SUBROUTINE WRITE_MATRIX(A)
+! it writes a matrix of doubles nxm on the screen
+  DOUBLE PRECISION, DIMENSION(:,:) :: A
+  CHARACTER(LEN=105) STRING
+  CHARACTER(LEN=105) aux_char
+  integer :: aux
+
+  aux = int(UBOUND(A,2))
+  !write(*,*) aux
+  write(aux_char,"(I4)") aux
+  aux_char = trim(aux_char)
+  write(string,"(A1,I4,A6)") "(",aux,"E15.6)"
+
+  DO I = LBOUND(A,1), UBOUND(A,1)
+     WRITE(*,string) (A(I,J), J = LBOUND(A,2), UBOUND(A,2))
+  END DO
+  WRITE(*,*)
+  WRITE(*,*)
+END SUBROUTINE WRITE_MATRIX
+
+SUBROUTINE WRITE_MATRIX_INT(A)
+!it writes a matrix of integer nxm on the screen
+  INTEGER, DIMENSION(:,:) :: A
+  WRITE(*,*)
+  DO I = LBOUND(A,1), UBOUND(A,1)
+     WRITE(*,*) (A(I,J), J = LBOUND(A,2), UBOUND(A,2))
+  END DO
+END SUBROUTINE WRITE_MATRIX_INT
+
+
+SUBROUTINE COORDINATEPACKING(D,A,V,R,C,index,INFO)
+  IMPLICIT NONE
+  INTEGER,INTENT(IN):: D
+  COMPLEX*16,DIMENSION(D,D),INTENT(IN)  :: A
+  COMPLEX*16,DIMENSION(D*D),INTENT(OUT) :: V
+  INTEGER, DIMENSION(D*D),  INTENT(OUT) :: R,C
+  INTEGER, INTENT(OUT)   :: index
+  INTEGER, INTENT(INOUT) :: INFO
+  
+  INTEGER I,J
+  V=0
+  R=0
+  C=0
+  
+  index = 1
+  DO I=1,D
+     DO J=1,D
+        IF(ABS(A(I,J)).GT.0) THEN
+           V(index) = A(I,J)
+           R(index) = I
+           C(index) = J
+           index = index+1
+        END IF
+     END DO
+  END DO
+  index = index-1
+END SUBROUTINE COORDINATEPACKING
+
+MODULE MERGINGARRAYS
+  INTERFACE
+     SUBROUTINE APPENDARRAYS(V,B,INFO)
+       COMPLEX*16, DIMENSION(:),ALLOCATABLE, INTENT(INOUT) :: V
+       COMPLEX*16, DIMENSION(:),INTENT(IN)    :: B
+       INTEGER,                 INTENT(INOUT) :: INFO
+     END SUBROUTINE APPENDARRAYS
+     SUBROUTINE APPENDARRAYSI(V,B,INFO)
+       INTEGER, DIMENSION(:),ALLOCATABLE, INTENT(INOUT) :: V
+       INTEGER, DIMENSION(:),INTENT(IN)    :: B
+       INTEGER,                 INTENT(INOUT) :: INFO
+     END SUBROUTINE APPENDARRAYSI
+  END INTERFACE
+END MODULE MERGINGARRAYS
+
+SUBROUTINE APPENDARRAYS(V,B,INFO)
+  COMPLEX*16, DIMENSION(:),ALLOCATABLE, INTENT(INOUT) :: V
+  COMPLEX*16, DIMENSION(:),INTENT(IN)    :: B
+  INTEGER,                 INTENT(INOUT) :: INFO
+  
+  COMPLEX*16,DIMENSION(:),ALLOCATABLE :: tmp_arr
+!  write(*,*) V
+!  write(*,*) B
+  ALLOCATE(tmp_arr(SIZE(V,1)+SIZE(B,1)))
+  tmp_arr(1:SIZE(V,1))=V
+  tmp_arr(SIZE(V,1)+1:SIZE(tmp_arr))=B
+  DEALLOCATE(V)
+  ALLOCATE(V(SIZE(tmp_arr)))
+  V=tmp_arr
+END SUBROUTINE APPENDARRAYS
+
+SUBROUTINE APPENDARRAYSI(V,B,INFO)
+  INTEGER, DIMENSION(:),ALLOCATABLE, INTENT(INOUT) :: V
+  INTEGER, DIMENSION(:),INTENT(IN)    :: B
+  INTEGER,                 INTENT(INOUT) :: INFO
+  
+  COMPLEX*16,DIMENSION(:),ALLOCATABLE :: tmp_arr
+  
+  ALLOCATE(tmp_arr(SIZE(V,1)+SIZE(B,1)))
+  tmp_arr(1:SIZE(V,1))=V
+  tmp_arr(SIZE(V,1)+1:SIZE(tmp_arr))=B
+  DEALLOCATE(V)
+  ALLOCATE(V(SIZE(tmp_arr)))
+  V=tmp_arr
+END SUBROUTINE APPENDARRAYSI
+
+

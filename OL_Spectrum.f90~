@@ -1,0 +1,70 @@
+!#8TH OF MAY 2020
+!# GERMAN SINUCO 
+!# PROGRAM TO EVALUATE THE BLOCH BANDS OF A PERIODIC POTENTIAL
+
+
+MODULE SUBINTERFACE_LAPACK
+
+  IMPLICIT NONE
+  PUBLIC 
+  INTERFACE
+     SUBROUTINE WRITE_MATRIX(A)
+       DOUBLE PRECISION, DIMENSION(:,:) :: A
+     END SUBROUTINE  WRITE_MATRIX
+
+     SUBROUTINE WRITE_MATRIX_INT(A)
+       INTEGER, DIMENSION(:,:) :: A
+     END SUBROUTINE  WRITE_MATRIX_INT
+     
+  END INTERFACE
+END MODULE SUBINTERFACE_LAPACK
+
+
+PROGRAM OL_SPECTRUM
+
+  USE SUBINTERFACE_LAPACK
+  IMPLICIT NONE
+  INTEGER L,m,n,info,BZ,D,i_,G
+  DOUBLE PRECISION :: a,k_,g_,momentum
+
+  COMPLEX*16,       DIMENSION(:,:), ALLOCATABLE :: V,K,H
+  DOUBLE PRECISION, DIMENSION(:),   ALLOCATABLE :: e
+
+  L   = 4
+  a   = 1.0
+  BZ  = 3
+  G   = 3
+
+  D = BZ*L+1
+  ALLOCATE(E(G*D))
+  ALLOCATE(V(G*D,G*D))
+  ALLOCATE(K(G*D,G*D))
+  ALLOCATE(H(G*D,G*D))
+
+  !# FOR EACH QUASIMOMENTUM (m)
+  K = 0.0
+  V = 0.0
+  i_ = 1
+  DO n=-1,1
+  DO m=1,D
+
+     !# KINETIC ENERGY 
+     momentum = 0.05*(-1.0*BZ*L/2.0 + 1.0*BZ*(m-1.0)*L/D - n)**2 
+     K(i_,i_) = momentum**2
+     
+     !# POTENTIAL ENERGY
+     !V(i_  ,i_+1) = 10.0
+     !V(i_+1,i_)   = 10.0
+
+     i_=i_+1
+     
+     !H = K + V
+     !write(*,*) real(H)
+  END DO
+  END DO
+  !write(*,*)real(K)
+  CALL WRITE_MATRIX(REAL(K))
+  !CALL LAPACK_FULLEIGENVALUES(H,L,E,INFO)
+  
+!
+END PROGRAM OL_SPECTRUM
