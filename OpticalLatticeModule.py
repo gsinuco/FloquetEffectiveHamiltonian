@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 def dl(t):
     
-    return 0.0 #+ 0.00001*np.cos(t)
+    return 0.5*np.cos(t)
 
 def phi(t):
     return 0.0
@@ -19,10 +19,19 @@ def phi(t):
 def V(OL,t):
     return OL.V
 
+def OL_driving_x(OL,x,t):
+    
+    #V =100.1*np.ones(x.shape)
+    #0.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)
+    V = OL.V*np.cos(OL.k_x*x+OL.phi_x)#0.5*OL.V_(t)*np.cos(2.0*(OL.k_x + OL.DK(t))*x+2.0*(OL.DK(t) + OL.phi_x))
+    return V
+
+
 def OL_driving(OL,x,t):
     
-    V =1.0*np.zeros(x.shape)
-    #0.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)#*(OL.V_(OL))#,t))#*np.cos(2.0*OL.DK(t)*x+2.0*OL.Dphi(t))/2.0 - OL.V/2.0) #+  0.5*OL.V_(OL,t)*(1.0 - np.sin(2.0*np.pi*x+2.0*OL.phi_x)*np.sin(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)))
+    #V =0.1*np.ones(x.shape)
+    #0.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)
+    V = 0.5*(OL.V_(t)*np.cos(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)) - OL.V)*np.cos(2*2*np.pi*x + 2*OL.phi_x) +  0.5*OL.V_(t)*(1.0 - np.sin(2.0*np.pi*x+2.0*OL.phi_x)*np.sin(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)))
     return V
 
 def U_t(t,x,OL,U_kn_x):
@@ -32,6 +41,7 @@ def U_t(t,x,OL,U_kn_x):
     
     V_x = np.diag(OL_driving(OL,x,t))
     U   = np.transpose(np.conjugate(U_kn_x))@V_x@U_kn_x
+   # U   = np.diag(1.0*np.ones(U_kn_x.shape[1]))
     return U
 
    # U   = np.abs(np.transpose(np.conjugate(U_kn_x))@U_kn_x)
@@ -61,16 +71,30 @@ def Schrodinger_Momentum_RHS(t,psi,H_0,x,OL,U_kn): # for ode
     
     return dpsidt_RHS
 
+def Schrodinger_RHS_position(t,psi,x,OL): # for ode
+    t_   = OL.omega*t
+    jj   = np.complex(0.0,1.0)
+    dx   = np.abs(x[0]-x[1])
+    H_0  = (-2.0*np.diag(np.ones([x.shape[0]])) + np.diag(np.ones([x.shape[0]-1]), -1) + np.diag(np.ones([x.shape[0] -1]), 1))/(dx*dx)
+    V    = np.diag(OL_driving_x(OL,x,t_))
+    H    = H_0 + V
+    dpsidt_RHS = -jj*H@psi
+    
+    return dpsidt_RHS
+
+
+
 
 class OpticalLattice():
     def __init__(self,V=1.0,phi_x=0,omega=1.0):                
         self.V     = V      # Depth
+        self.k_x   = 2.0*np.pi
         self.phi_x = phi_x  # phase  V cos^2(kx+phi)
-        self.omega = omega
+        self.omega = omega  # driving frequency
         
     
     def DK(self,t):
-        return np.pi/(1.0+dl(t)) - np.pi
+        return 2.0*np.pi/(1.0+dl(t)) - 2.0*np.pi
     
     def Dphi(self,t):
         return phi(t) - self.phi_x
@@ -107,7 +131,7 @@ class Bloch_spectrum(object):
         for m in np.linspace(-L/2,L/2,L+1):
             i_ = 0
             for n in np.linspace(-(G-1)/2,(G-1)/2,G):        
-                momentum   = (1.0*m/(L+1) - n) + 0.1*np.pi/(L+1)
+                momentum   = 2.0*(1.0*m/(L+1) - n) + 0.01*np.pi/(L+1)
                 K[i_,i_]   = 0.5*(2.0*np.pi)*(2.0*np.pi)*momentum*momentum # KINETIC ENERGY 
                 if (i_+1 < G):
                     V_[i_,i_+1] = 0.25*V*np.exp( 2.0*jj*OL.phi_x) #0.125   # POTENTIAL ENERGY         
@@ -158,7 +182,7 @@ class Bloch_spectrum(object):
         i_= 0
         jj = np.complex(0.0,1.0)
 
-        k      = np.pi * np.linspace(-(Bands-1)/2,(Bands-1)/2,Bands)
+        k      = 2.0* np.pi * np.linspace(-(Bands-1)/2,(Bands-1)/2,Bands)
         #x      = np.linspace(x_l,x_r,N_x)
         #kk, xx = np.meshgrid(k, x, sparse=False)
         # array of factors: exp(-i 2 np.pi n/a x)
@@ -180,7 +204,7 @@ class Bloch_spectrum(object):
                 n_ = n - (Bands-1)/2
                 #print(m)
                 if n == 0 :
-                    momentum = 2.0*np.pi*(m/(L+1)) + 0.1*np.pi/(L+1)
+                    momentum = 2.0*np.pi*(m/(L+1))
                 if (n-int(n/2)*2) != 0:
                     if m < 0:
                         momentum = 2.0*np.pi*(m/(L+1)) + 2.0*np.pi*int((n+1)/2) + 0.1*np.pi/(L+1)
@@ -195,6 +219,7 @@ class Bloch_spectrum(object):
                         momentum = 2.0*np.pi*(m/(L+1)) + 2.0*np.pi*int(n/2) + 0.1*np.pi/(L+1)
                     if m == 0:
                         momentum = -(2.0*np.pi*(m/(L+1)) + 2.0*np.pi*int(n/2)) + 0.1*np.pi/(L+1)
+                momentum = 2.0*momentum  + 0.01*np.pi/(L+1)
 
                 #print(L,i_,n,m,n_,momentum)#,momentum/np.pi)        
                 #if n=0 :
@@ -206,10 +231,10 @@ class Bloch_spectrum(object):
                     RealSpaceBlochfun_[:,n] = RealSpaceBlochfun_[:,n] + BlochWavefun[i_*Bands+m_,n]*np.exp(-jj*k[m_]*x)
                     
                 #RealSpaceBlochfun_[:,n] = momentum*np.ones(x.shape[0])
-                RealSpaceBlochfun_[:,n] = np.exp(jj*momentum*x)*RealSpaceBlochfun_[:,n]     
+                RealSpaceBlochfun_[:,n]    = np.exp(jj*momentum*x)*RealSpaceBlochfun_[:,n]     
                 RealSpaceMomentumfun_[:,n] = np.exp(jj*momentum*x)
 
-            RealSpaceBlochfun[i_*N_x:(i_+1)*N_x,:] = RealSpaceBlochfun_
+            RealSpaceBlochfun[i_*N_x:(i_+1)*N_x,:]    = RealSpaceBlochfun_
             RealSpaceMomentumfun[i_*N_x:(i_+1)*N_x,:] = RealSpaceMomentumfun_
 
                         

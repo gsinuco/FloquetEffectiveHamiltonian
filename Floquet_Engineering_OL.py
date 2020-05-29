@@ -40,16 +40,16 @@ jj = np.complex(0.0,1.0)
             
 
 # Set the domain of the wavefunctions and the potential energy
-x_l = -64.0
-x_r =  64.0    
-N_x =  1024# number of points in real space
+x_l = -255.0
+x_r =  255.0    
+N_x =  2517#513#4097#128*67# number of points in real space
 x   =  np.linspace(x_l,x_r,N_x)
 
 # Set the parameter of the static optical lattice parametrised by
 # V(x) = (V_0/2) cos(2*k_x  x  +  2.0*phase)
 V_0      = 20.1 # ~ Band gap
 phase_x  = 0.0     #np.pi/3.0
-omega    = 1.0     # in units of omega_0 = (E)/hbar, with E = (2 hbar/lambda_0)/m
+omega    = 2000.0     # in units of omega_0 = (E)/hbar, with E = (2 hbar/lambda_0)/m
 phase_t  = 0.0
 
 #################################################################
@@ -60,20 +60,20 @@ phase_t  = 0.0
 # define the number of bands to evaluate: make sure it is odd
 Bands = 7
 # define the number of values of momentum in the Brilloun Zone: make sure is even
-L     = 32
+L     = 16
 
 
 #################################################################
 ########  SCHRODINGER EQUATION ##################################
 #################################################################
 # Solve the Schrodinger equation for a subset of the bands:
-N_Bands = 1# number of bands to include in the Schrodinger equation
+N_Bands = 2# number of bands to include in the Schrodinger equation
 #set the initial condition and parameters to integrate the Schrodinger equation
 #psi0 = np.ones(E_0.size)
 t0   = 0   # initial time
 DT   = 2.0*np.pi/omega # total time to integrate
-t1   = t0 + DT # final time 
-N_t  = 512  # number of time steps
+t1   = t0 + DT # final time #
+N_t  = 256  # number of time steps
 dt   = DT/N_t # time step
 t    = np.linspace(t0,t0+DT, N_t) 
 
@@ -115,48 +115,61 @@ for n in range(N_Bands-1):
     U_x_  = np.transpose(np.reshape(RealSpaceBlochWavefun[:,n+1],[L+1,N_x]))
     U_x = np.concatenate([U_x,U_x_],axis=1)
 
-#U_x = np.transpose(np.reshape(RealSpaceMomentumWavefun[:,0],[L+1,N_x]))
-#for n in range(N_Bands-1):
-#    U_x_  = np.transpose(np.reshape(RealSpaceMomentumWavefun[:,n+1],[L+1,N_x]))
-#    U_x = np.concatenate([U_x,U_x_],axis=1)
 
-#%%    
+plt.contourf(np.log(np.abs(np.transpose(np.conjugate(U_x))@U_x)));
+plt.colorbar()
+plt.show()
+
+
 U_T = np.zeros([N_Bands*(L+1),N_Bands*(L+1)],dtype=np.complex)
-
-
-for j_ in range(N_Bands*(L+1)):
-    psi0 = np.zeros(E_0.size,dtype=np.complex)
-    psi0[j_] = 1.0#np.complex(0.0,1.0)
-            
-    # define the parameters of the integrator
-    # TO DO: TEST THE INTEGRATOR
-    solver.set_initial_value(psi0,t0).set_f_params(E_0,x,OL,U_x)
-    #solver.set_initial_value(psi0,t0).set_f_params(H_0,x,OL,U_x)
-
-    
-    psi_t = np.zeros([E_0.size],dtype=np.complex) # Initialise the time dependent wavefunction 
-    i_ = 0
-    if(j_==0):
-        f = np.zeros([N_t-1,N_Bands*(L+1)],dtype=complex)
-    while solver.successful() and solver.t<t1  and i_+1<N_t:
-        i_ = i_+1            
-        psi_t = solver.integrate(solver.t+dt)
-        if j_ == 0:
-            f[i_-1,:] = psi_t
-            #if j_ == 0:
-                #   psi_t_[i_,:] = p#si_t
-    #print(np.abs(psi_t))
-    U_T[:,j_] = psi_t
-    #print(j_,psi_t)
-    
+#%%
+#################################################################
+########  SCHRODINGER EQUATION ##################################
+#################################################################
+#for j_ in range(N_Bands*(L+1)):
+#    psi0 = np.zeros(E_0.size,dtype=np.complex)
+#    psi0[j_] = 1.0#np.complex(0.0,1.0)
+#            
+#    # define the parameters of the integrator
+#    # TO DO: TEST THE INTEGRATOR
+#    solver.set_initial_value(psi0,t0).set_f_params(E_0,x,OL,U_x)
+#    #solver.set_initial_value(psi0,t0).set_f_params(H_0,x,OL,U_x)
+# 
+#    
+#    psi_t = np.zeros([E_0.size],dtype=np.complex) # Initialise the time dependent #wavefunction 
+#    i_ = 0
+#    if(j_==0):
+ #       f = np.zeros([N_t-1,N_Bands*(L+1)],dtype=complex)
+#    while solver.successful() and solver.t<t1  and i_+1<N_t:
+#        i_ = i_+1            
+#        psi_t = solver.integrate(solver.t+dt)
+#        if j_ == 0:
+#            f[i_-1,:] = psi_t
+#            #if j_ == 0:
+#                #   psi_t_[i_,:] = p#si_t
+#    #print(np.abs(psi_t))
+#    U_T[:,j_] = psi_t
+#    #print(j_,psi_t)
+#    
 #plt.plot(f[:,0],f[:,1],f[:,0],f[:,2])
 #plt.show()
+ 
+#lambda_u,U = np.linalg.eig(U_T)
+#e_u = -np.arctan(np.imag(lambda_u)/np.real(lambda_u))/DT
 
-lambda_u,U = np.linalg.eig(U_T)
-e_u = -np.arctan(np.imag(lambda_u)/np.real(lambda_u))/DT
+U_T,U_x = FEH.FloquetStroboscopicOperator(N_Bands,t0,DT,N_t,x,OL,BlochSpectrum,RealSpaceBlochWavefun)
+
+
+
+lambda_u,U,e_u,H_eff_kn,H_eff_x = FEH.EffectiveFloquetHamiltonian(U_T,DT,U_x)
+
+V_eff_x = np.diag(H_eff_x) #- np.diag(KineticEnergy)
 k_u =np.argmax(np.abs(U),axis=0)
 
+
 #%%
+k_u =np.argmax(np.abs(U),axis=0)
+
 plt.contourf(np.abs(np.transpose(np.conjugate(U_x))@U_x))
 plt.colorbar()
 plt.show()
@@ -179,9 +192,10 @@ plt.show()
     
 plt.plot(k_u,e_u)
 plt.show()
+
 #plt.plot(e_u[k_u])
-plt.plot(E_0)
-plt.plot(np.diag(np.real(H_eff_kn)))
+#plt.plot(E_0)
+plt.plot(np.diag(np.real(H_eff_kn))[0:32])
 plt.show()
 
 #Transformation from the Bloch basis to the basis of position
@@ -192,6 +206,9 @@ H_eff_x = U_x@H_eff_kn@np.transpose(np.conjugate(U_x))
 #plt.show()
 
 plt.plot(x,np.diag(H_eff_x))
+plt.show()
+
+plt.plot(x[0:4*64],np.diag(H_eff_x)[0:4*64])
 #plt.contourf(np.abs(U))
 #plt.plot(np.abs(U))
 plt.show()
@@ -211,6 +228,10 @@ plt.show()
 
 #print(lambda_u)
 #print(np.diag(U_T))
+#%%
+plt.plot(E_0)
+plt.plot(np.diag(np.real(H_eff_kn)))
+plt.show()
 
 #%%
 plt.plot(RealSpaceWavefun[0:256,:])
