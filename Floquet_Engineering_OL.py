@@ -34,6 +34,8 @@ from scipy.integrate import ode
 
 import OpticalLatticeModule as OLM
 import FloquetEffectiveHamiltonian as FEH
+import Bloch_wave as BW
+
 #from OpticalLatticeModule import Bloch_spectrum as BS
 
 jj = np.complex(0.0,1.0)
@@ -42,7 +44,7 @@ jj = np.complex(0.0,1.0)
 # Set the domain of the wavefunctions and the potential energy
 x_l = -255.0
 x_r =  255.0    
-N_x =  2517#513#4097#128*67# number of points in real space
+N_x =  5137# number of points in real space
 x   =  np.linspace(x_l,x_r,N_x)
 
 # Set the parameter of the static optical lattice parametrised by
@@ -56,18 +58,17 @@ phase_t  = 0.0
 ##############  BLOCH SPECTRUM ##################################
 #################################################################
 # Set the parameter of the Bloch spectrum
-
 # define the number of bands to evaluate: make sure it is odd
-Bands = 7
+Bands = 3
 # define the number of values of momentum in the Brilloun Zone: make sure is even
-L     = 16
+L     = 64
 
 
 #################################################################
 ########  SCHRODINGER EQUATION ##################################
 #################################################################
 # Solve the Schrodinger equation for a subset of the bands:
-N_Bands = 2# number of bands to include in the Schrodinger equation
+N_Bands = 7# number of bands to include in the Schrodinger equation
 #set the initial condition and parameters to integrate the Schrodinger equation
 #psi0 = np.ones(E_0.size)
 t0   = 0   # initial time
@@ -77,7 +78,7 @@ N_t  = 256  # number of time steps
 dt   = DT/N_t # time step
 t    = np.linspace(t0,t0+DT, N_t) 
 
-
+#%%
 #Initialize the class of Optical Lattice
 OL    = OLM.OpticalLattice(V_0,phase_x)#OpticalLatticeModule.OpticalLattice(V_0,k_x,phase)
 #Initialize the class of the Bloch spectrum
@@ -91,12 +92,18 @@ BlochWavefun[0:3,0:3]@np.transpose(np.conjugate(BlochWavefun[3:6,0:3]))
 RealSpaceBlochWavefun,RealSpaceMomentumWavefun           = OLM.Bloch_spectrum.RealSpaceWavefun(BS,x,BlochWavefun) 
 
 #%%
-solver = ode(OLM.Schrodinger_RHS).set_integrator('zvode',method='bdf')
+N_x  = 128
+BlochSpectrum,RealSpaceBlochWavefun = BW.BlochSpectrum(L,N_x,Bands,4)
+k_u = np.empty(Bands*L)
+for i in range(Bands*L):
+    k_u[i] = BW.get_k(RealSpaceBlochWavefun[:, i], N_x)
+
+plt.plot(k_u,BlochSpectrum,".")
+plt.show()
 #solver = ode(OLM.Schrodinger_Momentum_RHS).set_integrator('zvode',method='bdf')
 #H_0    = BS.H_0[0:N_Bands*(L+1),0:N_Bands*(L+1)] # Hamiltonian in the basis of momentum
-
-t1   = t0 + DT # final time 
-dt   = DT/N_t # time step
+#%%
+solver = ode(OLM.Schrodinger_RHS).set_integrator('zvode',method='bdf')
 
 E_0 = BlochSpectrum[:,0]
 for i_ in range(N_Bands-1):
@@ -126,36 +133,6 @@ U_T = np.zeros([N_Bands*(L+1),N_Bands*(L+1)],dtype=np.complex)
 #################################################################
 ########  SCHRODINGER EQUATION ##################################
 #################################################################
-#for j_ in range(N_Bands*(L+1)):
-#    psi0 = np.zeros(E_0.size,dtype=np.complex)
-#    psi0[j_] = 1.0#np.complex(0.0,1.0)
-#            
-#    # define the parameters of the integrator
-#    # TO DO: TEST THE INTEGRATOR
-#    solver.set_initial_value(psi0,t0).set_f_params(E_0,x,OL,U_x)
-#    #solver.set_initial_value(psi0,t0).set_f_params(H_0,x,OL,U_x)
-# 
-#    
-#    psi_t = np.zeros([E_0.size],dtype=np.complex) # Initialise the time dependent #wavefunction 
-#    i_ = 0
-#    if(j_==0):
- #       f = np.zeros([N_t-1,N_Bands*(L+1)],dtype=complex)
-#    while solver.successful() and solver.t<t1  and i_+1<N_t:
-#        i_ = i_+1            
-#        psi_t = solver.integrate(solver.t+dt)
-#        if j_ == 0:
-#            f[i_-1,:] = psi_t
-#            #if j_ == 0:
-#                #   psi_t_[i_,:] = p#si_t
-#    #print(np.abs(psi_t))
-#    U_T[:,j_] = psi_t
-#    #print(j_,psi_t)
-#    
-#plt.plot(f[:,0],f[:,1],f[:,0],f[:,2])
-#plt.show()
- 
-#lambda_u,U = np.linalg.eig(U_T)
-#e_u = -np.arctan(np.imag(lambda_u)/np.real(lambda_u))/DT
 
 U_T,U_x = FEH.FloquetStroboscopicOperator(N_Bands,t0,DT,N_t,x,OL,BlochSpectrum,RealSpaceBlochWavefun)
 
@@ -165,10 +142,7 @@ lambda_u,U,e_u,H_eff_kn,H_eff_x = FEH.EffectiveFloquetHamiltonian(U_T,DT,U_x)
 
 V_eff_x = np.diag(H_eff_x) #- np.diag(KineticEnergy)
 k_u =np.argmax(np.abs(U),axis=0)
-
-
 #%%
-k_u =np.argmax(np.abs(U),axis=0)
 
 plt.contourf(np.abs(np.transpose(np.conjugate(U_x))@U_x))
 plt.colorbar()
@@ -186,262 +160,26 @@ plt.show()
 #Transformation from the Floquet basis to the basis of Bloch states
 H_eff_kn = U@H_eff_F@np.transpose(np.conjugate(U))#np.transpose(np.conjugate(U))@H_eff_F@U
 
-plt.contourf(np.abs(H_eff_kn))
+plt.contourf(np.real(H_eff_kn))
 plt.colorbar()
 plt.show()   
     
 plt.plot(k_u,e_u)
 plt.show()
 
-#plt.plot(e_u[k_u])
-#plt.plot(E_0)
-plt.plot(np.diag(np.real(H_eff_kn))[0:32])
+plt.plot(np.diag(np.real(H_eff_kn))[0:e_u.shape[0]])
 plt.show()
 
 #Transformation from the Bloch basis to the basis of position
 H_eff_x = U_x@H_eff_kn@np.transpose(np.conjugate(U_x))
-
-#plt.contourf(np.abs(H_eff_x))
-#plt.plot(np.abs(U_T))
-#plt.show()
-
 plt.plot(x,np.diag(H_eff_x))
 plt.show()
 
-plt.plot(x[0:4*64],np.diag(H_eff_x)[0:4*64])
-#plt.contourf(np.abs(U))
-#plt.plot(np.abs(U))
+plt.plot(x[0:32],np.diag(H_eff_x)[0:32])
 plt.show()
-
 
 #Transformation from the Boch basis to the basis of momentum
 H_eff_k = U_k@H_eff_kn@np.transpose(np.conjugate(U_k))
-
-#plt.contourf(np.abs(H_eff_x))
-#plt.plot(np.abs(U_T))
-#plt.show()
-
 plt.plot(np.diag(H_eff_k))
-#plt.contourf(np.abs(U))
-#plt.plot(np.abs(U))
 plt.show()
 
-#print(lambda_u)
-#print(np.diag(U_T))
-#%%
-plt.plot(E_0)
-plt.plot(np.diag(np.real(H_eff_kn)))
-plt.show()
-
-#%%
-plt.plot(RealSpaceWavefun[0:256,:])
-plt.show()
-
-print(np.abs(np.transpose(np.conjugate(RealSpaceWavefun[0:N_x,:]))@RealSpaceWavefun[0:N_x,:]))
-print(np.abs(np.transpose(np.conjugate(RealSpaceWavefun[N_x:2*N_x,:]))@RealSpaceWavefun[N_x:2*N_x,:]))
-print(np.abs(np.transpose(np.conjugate(RealSpaceWavefun[10*N_x:11*N_x,:]))@RealSpaceWavefun[9*N_x:10*N_x,:]))
-
-# Example of how to plot the Bloch spectrum
-k = np.linspace(-np.pi,np.pi,L+1)
-plt.plot(k,BlochSpectrum[:,0],k,BlochSpectrum[:,1],k,BlochSpectrum[:,2])
-plt.title("Bloch spectrum ")
-plt.xlabel('x/a', fontsize=12)
-plt.ylabel('Energy [E=(hbar/a)^2/m]', fontsize=12)
-plt.show()
-plt.savefig('BlochSpectrum.png')
-
-
-G = np.linspace(-(Bands-1)/2,(Bands-1)/2,Bands)
-plt.plot(G,np.real(BlochWavefun[0:Bands,0:3]))
-plt.title("Bloch Functions: momentum representation |-pi/a,n>")
-plt.xlabel('G = 2 pi q /a', fontsize=12)
-plt.ylabel('<G|-pi,n>', fontsize=12)
-plt.show()
-plt.savefig('BlochWavefun_k.png')
-
-plt.title("Bloch Functions: position representation |-pi/a,n>")
-plt.plot(x,np.power(np.abs(RealSpaceWavefun[0:N_x,0]),2))  # ,x,np.imag(RealSpaceWavefun[:,m]))
-plt.plot(x,np.power(np.abs(RealSpaceWavefun[0:N_x,1]),2)) # ,x,np.imag(RealSpaceWavefun[:,m]))
-plt.plot(x,np.power(np.abs(RealSpaceWavefun[0:N_x,2]),2)) # ,x,np.imag(RealSpaceWavefun[:,m]))
-plt.xlabel('x/a', fontsize=12)
-plt.ylabel('|<x|-pi,n>|^2', fontsize=12)
-plt.show()
-plt.savefig('BlochWavefun_x.png')
-
-#%%
-
-n=2
-plt.title("Bloch Functions: position representation |-pi,n>")
-plt.plot(x,np.power(np.abs(RealSpaceWavefun[0:N_x,n]),2))  # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.show()
-plt.plot(x,np.power(np.abs(RealSpaceWavefun[N_x:2*N_x,n]),2)) # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.show()
-plt.plot(x,np.power(np.abs(RealSpaceWavefun[2*N_x:3*N_x,n]),2)) # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.show()
-plt.plot(x,np.power(np.abs(RealSpaceWavefun[3*N_x:4*N_x,n]),2),x,np.zeros(N_x)) # ,x,np.imag(RealSpaceWavefun[:,m]))
-plt.show()
-plt.plot(x,np.power(np.abs(RealSpaceWavefun[4*N_x:5*N_x,n]),2)) # ,x,np.imag(RealSpaceWavefun[:,m]))
-plt.show()
-#plt.xlabel('x/a', fontsize=12)
-#plt.ylabel('<x|-pi,n>', fontsize=12)
-#plt.show()
-
-U_x_0 = np.transpose(np.reshape(RealSpaceWavefun[:,n],[L+1,N_x]))
-
-##plt.plot(np.power(np.abs(U_x_[4,:]),2))
-##plt.show()
-##plt.plot(np.power(np.abs(RealSpaceWavefun[4*N_x:5*N_x,n]),2))
-##plt.show()###
-
-plt.contourf(np.power(np.abs(U_x_0),2))#
-plt.colorbar()
-plt.show()
-
-#U_x_1 = np.transpose(np.reshape(RealSpaceWavefun[:,1],[L+1,N_x]))
-
-#plt.plot(np.power(np.abs(U_x_[4,:]),2))
-#plt.show()
-#plt.plot(np.power(np.abs(RealSpaceWavefun[4*N_x:5*N_x,n]),2))
-#plt.show()
-
-#plt.contourf(np.power(np.abs(U_x_1),2))
-#plt.colorbar()
-#plt.show()
-
-#U_x_ = np.concatenate([U_x_0,U_x_1],axis=1)
-
-#plt.contourf(np.power(np.abs(U_x_),2))
-#plt.colorbar()
-#plt.show()
-
-#plt.contourf(np.power(np.abs(U_x),2))
-#plt.show()
-
-#plt.plot(x,np.power(np.abs(RealSpaceWavefun[0:N_x,n]),2))  # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.plot(x,np.power(np.abs(RealSpaceWavefun[int(L/2) * N_x:(int(L/2)+1)*N_x,n]),2))  # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.plot(x,np.power(np.abs(RealSpaceWavefun[L*N_x:(L+1)*N_x,n]),2))  # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.show()
-
-
-#%%
-#################################################################
-########  SCHRODINGER EQUATION ##################################
-#################################################################
-
-U_T,U_x = FEH.FloquetStroboscopicOperator(N_Bands,t0,DT,N_t,x,OL,BlochSpectrum,RealSpaceBlochWavefun)
-
-
-
-lambda_u,U,e_u,H_eff_kn,H_eff_x = FEH.EffectiveFloquetHamiltonian(U_T,DT,U_x)
-
-V_eff_x = np.diag(H_eff_x) #- np.diag(KineticEnergy)
-k_u =np.argmax(np.abs(U),axis=0)
-
-#%%    
-
-plt.plot(k,BlochSpectrum[:,0],k,BlochSpectrum[:,1],k,BlochSpectrum[:,2])#,k,BlochSpectrum[:,2])
-plt.plot(k,e_u[0:L+1])#,k,e_u[(L+1):2*(L+1)],k,e_u[2*(L+1):3*(L+1)])#,k,e_u[2*(L+1):3*(L+1)],k,e_u[3*(L+1):4*(L+1)])
-#plt.plot(k,e_u[0:L+1],k,BlochSpectrum[:,0])
-plt.show()
-
-#%%
-plt.plot(k,np.real(lambda_u))
-plt.plot(k,np.imag(lambda_u))
-plt.show()
-#%%
-
-plt.contourf(np.imag(U_x))
-plt.show()
-
-plt.contourf(np.real(U_x))
-plt.show()
-
-plt.contourf(np.power(np.abs(U_x),2))
-plt.show()
-
-#%%
-#RealSpaceWavefun[i_*N_x:(i_+1)*N_x,n]
-#plt.contourf(np.imag(np.reshape(RealSpaceWavefun[:,0],[N_x,(2*L+1)])))
-#plt.show()
-
-plt.contourf(np.real(U_x))
-plt.show()
-
-plt.contourf(np.abs(U_x))
-plt.show()
-
-
-plt.contourf(np.imag(U_T))
-plt.show()
-
-plt.contourf(np.real(U_T))
-plt.show()
-
-#%%
-plt.contourf(H_eff_x)
-plt.colorbar()
-plt.show()
-
-plt.plot(x[0:int(N_x/12)],V_eff_x[0:int(N_x/12)])
-plt.xlabel('x/a', fontsize=12)
-plt.ylabel('V_eff(x)', fontsize=12)
-plt.show()
-    
-#%%
-n=0
-plt.title("Bloch Functions: position representation |-pi,n=0>")
-plt.plot(x,np.abs(RealSpaceWavefun[0:N_x,n]))  # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.show()
-plt.plot(x,np.abs(RealSpaceWavefun[int(L/4)*N_x:(int(L/4)+1)*N_x,n]))
-#plt.show()
-plt.plot(x,np.abs(RealSpaceWavefun[int(L/2)*N_x:(int(L/2)+1)*N_x,n]))
-#plt.show()
-plt.plot(x,np.abs(RealSpaceWavefun[int(3*L/4)*N_x:(int(3*L/4)+1)*N_x,n]))
-#plt.show()
-plt.plot(x,np.abs(RealSpaceWavefun[L*N_x:(L+1)*N_x,n])) # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.show()
-
-n=1
-plt.title("Bloch Functions: position representation |-pi,n=1>")
-plt.plot(x,np.abs(RealSpaceWavefun[0:N_x,n]))  # ,x,np.imag(RealSpaceWavefun[:,m]))
-plt.plot(x,np.abs(RealSpaceWavefun[int(L/4)*N_x:(int(L/4)+1)*N_x,n]))
-plt.plot(x,np.abs(RealSpaceWavefun[int(L/2)*N_x:(int(L/2)+1)*N_x,n]))
-plt.plot(x,np.abs(RealSpaceWavefun[int(3*L/4)*N_x:(int(3*L/4)+1)*N_x,n]))
-plt.plot(x,np.abs(RealSpaceWavefun[L*N_x:(L+1)*N_x,n])) # ,x,np.imag(RealSpaceWavefun[:,m]))
-#plt.show()
-n=2
-#plt.title("Bloch Functions: position representation |-pi,n=2>")
-plt.plot(x,np.abs(RealSpaceWavefun[0:N_x,n]))  # ,x,np.imag(RealSpaceWavefun[:,m]))
-plt.plot(x,np.abs(RealSpaceWavefun[int(L/4)*N_x:(int(L/4)+1)*N_x,n]))
-plt.plot(x,np.abs(RealSpaceWavefun[int(L/2)*N_x:(int(L/2)+1)*N_x,n]))
-plt.plot(x,np.abs(RealSpaceWavefun[int(3*L/4)*N_x:(int(3*L/4)+1)*N_x,n]))
-plt.plot(x,np.abs(RealSpaceWavefun[L*N_x:(L+1)*N_x,n])) # ,x,np.imag(RealSpaceWavefun[:,m]))
-
-plt.xlabel('x/a', fontsize=12)
-plt.ylabel('<x|-pi,n>', fontsize=12)
-plt.show()
-#%%
-
-#%%    
-
-k = np.linspace(-np.pi,np.pi,L+1)
-plt.plot(k,BlochSpectrum[:,0],k,BlochSpectrum[:,1],k,BlochSpectrum[:,2])#,k,BlochSpectrum[:,2])
-plt.plot(k,e_u[0:L+1])#,k,e_u[(L+1):2*(L+1)],k,e_u[2*(L+1):3*(L+1)])#,k,e_u[2*(L+1):3*(L+1)],k,e_u[3*(L+1):4*(L+1)])
-#plt.plot(k,e_u[0:L+1],k,BlochSpectrum[:,0])
-plt.show()
-#%%
-plt.contourf(np.abs(np.transpose(np.conjugate(U_x))@U_x))
-plt.colorbar()
-plt.show()
-#%%
-
-plt.plot(x,np.real(U_x[:,1]),x,np.real(U_x[:,5]))#,x,np.imag(U_x[:,8]))
-plt.plot(x,np.imag(U_x[:,1]),x,np.imag(U_x[:,5]),x,np.imag(U_x[:,8]))
-plt.show()
-#%%
-plt.contourf(np.abs(np.transpose(np.conjugate(U_x))@U_x)[0:128,0:128])
-plt.colorbar()
-plt.show()
-
-#%%
-#plt.plot(U_x)
