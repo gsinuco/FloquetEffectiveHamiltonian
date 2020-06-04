@@ -97,6 +97,9 @@ def V_box(size=0.5):
 def V_sin(freqs):
     V0 = 5
     return lambda x : np.sum([V0*cos(2*pi*x*i) for i in range(freqs+1)], axis=0)
+    #return lambda x : np.sum([V0*cos(2*pi*x*i) for i in [freqs+1]], axis=0)
+
+    #return lambda x : V0*cos(2*pi*x*10.0)
 
 
 def BlochSpectrum(L=64,m=32,Bands=2,n=1):
@@ -108,12 +111,12 @@ def BlochSpectrum(L=64,m=32,Bands=2,n=1):
     Vs = [V_sin(n)]#[V_sin(i) for i in range(n)]
     for i in [0]:#range(n):
         l, v = get_eigen(N, L, numVec, Vs[i])
-        k_u = plot_eigenvals(l, v, m, "vals_{}".format(i))
+       # k_u = plot_eigenvals(l, v, m, "vals_{}".format(i))
         #plot_eigenvecs(v, 4, N, L, Vs[i], "vecs_{}".format(i))
     return l,v
     
-L     = 64
-N_x   = 32
-Bands = 3
-n     = 4
-l,v = BlochSpectrum(L,N_x,Bands,n)
+#L     = 64
+#N_x   = 32
+#Bands = 3
+#n     = 4
+#l,v = BlochSpectrum(L,N_x,Bands,n)

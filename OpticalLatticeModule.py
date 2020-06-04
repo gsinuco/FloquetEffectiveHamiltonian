@@ -21,16 +21,16 @@ def V(OL,t):
 
 def OL_driving_x(OL,x,t):
     
-    #V =100.1*np.ones(x.shape)
+    V =100.1*np.ones(x.shape)
     #0.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)
-    V = OL.V*np.cos(OL.k_x*x+OL.phi_x)#0.5*OL.V_(t)*np.cos(2.0*(OL.k_x + OL.DK(t))*x+2.0*(OL.DK(t) + OL.phi_x))
+    #V = OL.V*np.cos(OL.k_x*x+OL.phi_x)#0.5*OL.V_(t)*np.cos(2.0*(OL.k_x + OL.DK(t))*x+2.0*(OL.DK(t) + OL.phi_x))
     return V
 
 
 def OL_driving(OL,x,t):
     
-    #V =0.1*np.ones(x.shape)
-    #0.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)
+    #V =10.1*np.ones(x.shape)
+    #V = 5.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)
     V = 0.5*(OL.V_(t)*np.cos(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)) - OL.V)*np.cos(2*2*np.pi*x + 2*OL.phi_x) +  0.5*OL.V_(t)*(1.0 - np.sin(2.0*np.pi*x+2.0*OL.phi_x)*np.sin(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)))
     return V
 

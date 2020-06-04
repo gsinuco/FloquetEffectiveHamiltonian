@@ -92,8 +92,8 @@ BlochWavefun[0:3,0:3]@np.transpose(np.conjugate(BlochWavefun[3:6,0:3]))
 RealSpaceBlochWavefun,RealSpaceMomentumWavefun           = OLM.Bloch_spectrum.RealSpaceWavefun(BS,x,BlochWavefun) 
 
 #%%
-N_x  = 128
-BlochSpectrum,RealSpaceBlochWavefun = BW.BlochSpectrum(L,N_x,Bands,4)
+N_x  = 32
+BlochSpectrum,RealSpaceBlochWavefun = BW.BlochSpectrum(L,N_x,Bands,3)
 k_u = np.empty(Bands*L)
 for i in range(Bands*L):
     k_u[i] = BW.get_k(RealSpaceBlochWavefun[:, i], N_x)

@@ -16,6 +16,50 @@ from scipy.integrate import ode
 ########  SCHRODINGER EQUATION ##################################
 #################################################################
 
+def FloquetStroboscopicOperatorV2(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,BlochSpectrum=0,RealSpaceWavefun=0):
+    # Solve the Schrodinger equation for a subset of the bands:
+    #N_Bands = 2 # number of bands to include in the Schrodinger equation
+
+
+    #set the initial condition and parameters to integrate the Schrodinger equation
+    #psi0 = np.ones(E_0.size)
+    #t0   = 0   # initial time
+    #DT   = 6.0 # total time to integrate
+    t1   = t0 + DT # final time 
+    #N_t  = 128   # number of time steps
+    dt   = DT/N_t # time step
+    #t    = np.linspace(t0,t0+DT, N_t) 
+    #L    = BlochSpectrum.shape[0]/RealSpaceWavefun.shape[1]
+    N_x  = RealSpaceWavefun.shape[0]
+    
+    E_0 = BlochSpectrum[0:int(N_Bands*L)]
+    U_x = RealSpaceWavefun[:,0:int(N_Bands*L)]
+
+    # SET THE INTEGRATOR
+    solver = ode(OLM.Schrodinger_RHS).set_integrator('zvode',method='bdf')
+    U_T = np.zeros([int(N_Bands*L),int(N_Bands*L)],dtype=np.complex)
+
+
+    for j_ in range(int(N_Bands*L)):
+        psi0 = np.zeros(E_0.size,dtype=np.complex)
+        psi0[j_] = 1.0
+            
+        # define the parameters of the integrator
+        # TO DO: TEST THE INTEGRATOR
+    
+        solver.set_initial_value(psi0,t0).set_f_params(E_0,x,OL,U_x)
+        
+        psi_t = 1.0
+        i_ = 0
+        while solver.successful() and solver.t<t1  and i_+1<N_t:
+            i_ = i_+1            
+            psi_t = solver.integrate(solver.t+dt)
+                                
+        U_T[:,j_] = psi_t
+
+    return U_T,U_x
+
+
 def FloquetStroboscopicOperator(N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,BlochSpectrum=0,RealSpaceWavefun=0):
     # Solve the Schrodinger equation for a subset of the bands:
     #N_Bands = 2 # number of bands to include in the Schrodinger equation
