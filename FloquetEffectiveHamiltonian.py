@@ -11,10 +11,134 @@ Created on Mon May 18 20:44:12 2020
 import numpy as np
 import OpticalLatticeModule as OLM
 from scipy.integrate import ode
+from scipy.integrate import complex_ode
 
 #################################################################
 ########  SCHRODINGER EQUATION ##################################
 #################################################################
+
+def cart2polar(lambda_u,N):
+            
+    e_u = np.zeros(N,dtype=np.float64)
+    for i in range(N):
+        if (np.imag(lambda_u[i]) < 0) & (np.real(lambda_u[i]) > 0):
+            e_u[i] = -np.arctan(np.imag(lambda_u[i])/np.real(lambda_u[i]))
+        if (np.imag(lambda_u[i]) < 0) & (np.real(lambda_u[i]) < 0):
+            e_u[i] = -np.arctan(np.imag(lambda_u[i])/np.real(lambda_u[i]))+np.pi
+        if (np.imag(lambda_u[i]) >0) & (np.real(lambda_u[i]) < 0):
+            e_u[i] = -np.arctan(np.imag(lambda_u[i])/np.real(lambda_u[i]))+np.pi
+        if (np.imag(lambda_u[i]) >0) & (np.real(lambda_u[i]) > 0):
+            e_u[i] = -np.arctan(np.imag(lambda_u[i])/np.real(lambda_u[i]))+2.0*np.pi
+        if (np.imag(lambda_u[i]) >0) & (np.real(lambda_u[i]) == 0):
+            e_u[i] = np.pi/2.0
+        if (np.imag(lambda_u[i]) <0) & (np.real(lambda_u[i]) == 0):
+            e_u[i] = 3.0*np.pi/2.0
+        if (np.imag(lambda_u[i]) == 0) & (np.real(lambda_u[i]) > 0):
+            e_u[i] = 0.0
+        if (np.imag(lambda_u[i]) == 0) & (np.real(lambda_u[i]) < 0):
+            e_u[i] = np.pi
+        if (np.imag(lambda_u[i]) == 0) & (np.real(lambda_u[i]) == 0):
+            e_u[i] = 0.0
+
+    return e_u
+
+
+def FloquetStroboscopicOperatorV4(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,BlochSpectrum=0,RealSpaceWavefun=0):
+    # Solve the Schrodinger equation for a subset of the bands:
+    #N_Bands = 2 # number of bands to include in the Schrodinger equation
+    # here we store the solution step by step, to track the time evolution of the
+    # quasienergies
+    # For each time step, we built U_T and diagonalise
+    # then we plot phi vs t
+
+
+    #set the initial condition and parameters to integrate the Schrodinger equation
+    #psi0 = np.ones(E_0.size)
+    #t0   = 0   # initial time
+    #DT   = 6.0 # total time to integrate
+    t1   = t0 + DT # final time 
+    #N_t  = 128   # number of time steps
+    dt   = DT/N_t # time step
+    #t    = np.linspace(t0,t0+DT, N_t) 
+    #L    = BlochSpectrum.shape[0]/RealSpaceWavefun.shape[1]
+    N_x  = RealSpaceWavefun.shape[0]
+    
+    E_0 = BlochSpectrum[0:int(N_Bands*L)]
+    E_0 = E_0 - np.min(E_0)
+
+    #E_0 = np.linspace(1,int(N_Bands*L),int(N_Bands*L))#BlochSpectrum[0:int(N_Bands*L)]
+    U_x = RealSpaceWavefun[:,0:int(N_Bands*L)]
+
+    # SET THE INTEGRATOR
+    case = OLM.Schrodinger(OLM.Schrodinger_RHS, fargs=[E_0,x,OL,U_x])
+
+    solver = complex_ode(case.f)
+    solver.set_integrator('dopri5')#,method='bdf')
+    #U_T = np.zeros([int(N_Bands*L),int(N_Bands*L)],dtype=np.complex)
+    # initial condition
+    U_T = np.diag(np.ones([int(N_Bands*L)],dtype=np.complex))
+
+    i_ = 0
+    t = t0
+    lambda_u_t = np.zeros(N_Bands*L,dtype=np.complex)
+    phi_t      = np.zeros([N_Bands*L,N_t],dtype=np.complex)
+    #while solver.successful() and solver.t<t1  and i_+1<N_t:
+    for j_ in range(int(N_Bands*L)):
+            solver.set_initial_value(U_T[:,j_],t0)
+            solver.integrate(t1)
+            U_T[:,j_] = np.array(sol)            
+            lambda_u_t,U = np.linalg.eig(U_T)
+            phi_t[:,i_] = cart2polar(lambda_u_t,N_Bands*L)
+     
+    return phi_t,U_T,U_x
+
+
+def FloquetStroboscopicOperatorV3(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,BlochSpectrum=0,RealSpaceWavefun=0):
+    # Solve the Schrodinger equation for a subset of the bands:
+    #N_Bands = 2 # number of bands to include in the Schrodinger equation
+    # here we store the solution step by step, to track the time evolution of the
+    # quasienergies
+    # For each time step, we built U_T and diagonalise
+    # then we plot phi vs t
+
+
+    #set the initial condition and parameters to integrate the Schrodinger equation
+    #psi0 = np.ones(E_0.size)
+    #t0   = 0   # initial time
+    #DT   = 6.0 # total time to integrate
+    t1   = t0 + DT # final time 
+    #N_t  = 128   # number of time steps
+    dt   = DT/N_t # time step
+    #t    = np.linspace(t0,t0+DT, N_t) 
+    #L    = BlochSpectrum.shape[0]/RealSpaceWavefun.shape[1]
+    N_x  = RealSpaceWavefun.shape[0]
+    
+    E_0 = BlochSpectrum[0:int(N_Bands*L)]
+    E_0 = E_0 - np.min(E_0)
+
+    #E_0 = np.linspace(1,int(N_Bands*L),int(N_Bands*L))#BlochSpectrum[0:int(N_Bands*L)]
+    U_x = RealSpaceWavefun[:,0:int(N_Bands*L)]
+
+    # SET THE INTEGRATOR
+    solver = ode(OLM.Schrodinger_RHS).set_integrator('zvode',method='bdf')
+    #U_T = np.zeros([int(N_Bands*L),int(N_Bands*L)],dtype=np.complex)
+    # initial condition
+    U_T = np.diag(np.ones([int(N_Bands*L)],dtype=np.complex))
+
+    i_ = 0
+    t = t0
+    lambda_u_t = np.zeros(N_Bands*L,dtype=np.complex)
+    phi_t      = np.zeros([N_Bands*L,N_t],dtype=np.complex)
+    while solver.successful() and solver.t<t1  and i_+1<N_t:
+        for j_ in range(int(N_Bands*L)):
+            solver.set_initial_value(U_T[:,j_],t).set_f_params(E_0,x,OL,U_x)
+            U_T[:,j_] = solver.integrate(solver.t+dt)        
+        lambda_u_t,U = np.linalg.eig(U_T)
+        phi_t[:,i_] = cart2polar(lambda_u_t,N_Bands*L)
+        i_ = i_+1
+     
+    return phi_t,U_T,U_x
+
 
 def FloquetStroboscopicOperatorV2(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,BlochSpectrum=0,RealSpaceWavefun=0):
     # Solve the Schrodinger equation for a subset of the bands:
@@ -33,6 +157,9 @@ def FloquetStroboscopicOperatorV2(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,Bloch
     N_x  = RealSpaceWavefun.shape[0]
     
     E_0 = BlochSpectrum[0:int(N_Bands*L)]
+    E_0 = E_0 - np.min(E_0)
+
+    #E_0 = np.linspace(1,int(N_Bands*L),int(N_Bands*L))#BlochSpectrum[0:int(N_Bands*L)]
     U_x = RealSpaceWavefun[:,0:int(N_Bands*L)]
 
     # SET THE INTEGRATOR
@@ -54,6 +181,9 @@ def FloquetStroboscopicOperatorV2(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,Bloch
         while solver.successful() and solver.t<t1  and i_+1<N_t:
             i_ = i_+1            
             psi_t = solver.integrate(solver.t+dt)
+            #if j_ == int(N_Bands*L) - 1:
+            #    print(psi_t[j_])
+            
                                 
         U_T[:,j_] = psi_t
 
@@ -157,8 +287,30 @@ def EffectiveFloquetHamiltonian(U_T = 0, DT = 1.0,U_x = 0.0):
     #index_ = np.int(np.argmax(U,axis=1)/U_T.shape[0])
     
     #print(lambda_u)
-    e_u = -np.arctan(np.imag(lambda_u)/np.real(lambda_u))/DT
-    
+    e_u = np.zeros([lambda_u.shape[0]],dtype=np.float64)
+    #e_u = cart2polar(lambda_u,lambda_u.shape[0]):
+    for i in range(lambda_u.shape[0]):
+        if (np.imag(lambda_u[i]) < 0) & (np.real(lambda_u[i]) > 0):
+            e_u[i] = -np.arctan(np.imag(lambda_u[i])/np.real(lambda_u[i]))
+        if (np.imag(lambda_u[i]) < 0) & (np.real(lambda_u[i]) < 0):
+            e_u[i] = -np.arctan(np.imag(lambda_u[i])/np.real(lambda_u[i]))+np.pi
+        if (np.imag(lambda_u[i]) >0) & (np.real(lambda_u[i]) < 0):
+            e_u[i] = -np.arctan(np.imag(lambda_u[i])/np.real(lambda_u[i]))+np.pi
+        if (np.imag(lambda_u[i]) >0) & (np.real(lambda_u[i]) > 0):
+            e_u[i] = -np.arctan(np.imag(lambda_u[i])/np.real(lambda_u[i]))+2.0*np.pi
+        if (np.imag(lambda_u[i]) >0) & (np.real(lambda_u[i]) == 0):
+            e_u[i] = np.pi/2.0
+        if (np.imag(lambda_u[i]) <0) & (np.real(lambda_u[i]) == 0):
+            e_u[i] = 3.0*np.pi/2.0
+        if (np.imag(lambda_u[i]) == 0) & (np.real(lambda_u[i]) > 0):
+            e_u[i] = 0.0
+        if (np.imag(lambda_u[i]) == 0) & (np.real(lambda_u[i]) < 0):
+            e_u[i] = np.pi
+        if (np.imag(lambda_u[i]) == 0) & (np.real(lambda_u[i]) == 0):
+            e_u[i] = 0.0
+        
+    #e_u = -np.arctan(np.imag(lambda_u)/np.real(lambda_u))
+    e_u = e_u/DT
     #plt.plot(k,e_u,k,BlochSpectrum[:,0])
     #plt.show()
     

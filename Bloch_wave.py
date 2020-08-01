@@ -87,36 +87,41 @@ def plot_eigenvecs(v, n, N, L, V_period, name):
     
 # Potentials to repeat
 def V_box(size=0.5):
-    V0 = 5
+    V0 = 1.0
     sides = (1-size)/2
     V = np.zeros_like(x)
     mask = np.logical_and(x>sides, x<(sides+size))
     V[mask] = V0*np.ones_like(x[mask])
     return V
 
-def V_sin(freqs):
-    V0 = 5
-    return lambda x : np.sum([V0*cos(2*pi*x*i) for i in range(freqs+1)], axis=0)
-    #return lambda x : np.sum([V0*cos(2*pi*x*i) for i in [freqs+1]], axis=0)
-
-    #return lambda x : V0*cos(2*pi*x*10.0)
+def V_sin(freqs,V0,phi):
+    #V0 = 10.0
+    #return lambda x : np.sum([cos(2*pi*x*i) for i in range(freqs+1)], axis=0)
+    return lambda x : V0*(0.5 + 0.5*cos(2*pi*x+phi))#np.sum([0.5*cos(2*pi*x*i) for i in [0,1]], axis=0)
 
 
-def BlochSpectrum(L=64,m=32,Bands=2,n=1):
+def BlochSpectrum(L=64,m=32,Bands=2,V=1.0,phi = 0):
     #L = 64 # Number of periods in lattice
     #m = 32 # Number of points in a period
+    n = 2
     N = m*L
     numVec = Bands*L
     #n = 1
-    Vs = [V_sin(n)]#[V_sin(i) for i in range(n)]
-    for i in [0]:#range(n):
+    x = np.linspace(0, L, N)
+
+    Vs = [V_sin(i,V,phi) for i in range(n)]
+    for i in [n-2]:#range(n-1):
         l, v = get_eigen(N, L, numVec, Vs[i])
-       # k_u = plot_eigenvals(l, v, m, "vals_{}".format(i))
+        #k_u = plot_eigenvals(l, v, m, "vals_{}".format(i))
+        #plt.show()
         #plot_eigenvecs(v, 4, N, L, Vs[i], "vecs_{}".format(i))
+        #plt.plot(x,Vs[i](x))
+        #plt.show()
     return l,v
     
-#L     = 64
+#L     = 32
 #N_x   = 32
 #Bands = 3
-#n     = 4
-#l,v = BlochSpectrum(L,N_x,Bands,n)
+#V     = 30
+#phi   = pi/4.0
+#l,v = BlochSpectrum(L,N_x,Bands,V,phi)

@@ -9,6 +9,15 @@ Created on Mon May 18 20:03:38 2020
 import numpy as np
 import matplotlib.pyplot as plt
 
+class Schrodinger(object):
+    def __init__(self, f, fargs=[]):
+        self._f = f
+        self.fargs=fargs
+
+    def f(self, t, z):
+        return self._f(t, z, *self.fargs)
+
+
 def dl(t):
     
     return 0.5*np.cos(t)
@@ -29,7 +38,7 @@ def OL_driving_x(OL,x,t):
 
 def OL_driving(OL,x,t):
     
-    #V =10.1*np.ones(x.shape)
+    #V = 0.0*np.ones(x.shape)
     #V = 5.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)
     V = 0.5*(OL.V_(t)*np.cos(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)) - OL.V)*np.cos(2*2*np.pi*x + 2*OL.phi_x) +  0.5*OL.V_(t)*(1.0 - np.sin(2.0*np.pi*x+2.0*OL.phi_x)*np.sin(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)))
     return V
