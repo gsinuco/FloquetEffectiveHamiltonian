@@ -42,6 +42,184 @@ def cart2polar(lambda_u,N):
 
     return e_u
 
+def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0):
+    # Takes the time-evolution of the Floquet phases, defined with the eigenvalues of
+    # the time-evolution operator:
+    # Calculate U(t,t_0)
+    # evaluate the eigenvalues
+    # define the phase as
+    # phi(t) = atan(imag(eigenvalue)/real(eigenvalues))
+    # 
+    phase_sec_order_aux = UnfoldingFloquetSpectrum_aux(L,dt,N_t,phi_t)
+    phases = np.copy(phase_sec_order_aux)
+    for j_ in range(L):
+        i  = N_t-2      
+        grad_ref = phase_sec_order_aux[j_,i] - phase_sec_order_aux[j_,i-1]
+    
+        for i in range(N_t-2):#range(phase_sec_order_aux.shape[1]-2):   
+            grad_new   = phases[j_,N_t-2-(i+1)]   - phases[j_,N_t-2-(i+2)]  
+            grad_new_2 = phases[j_,N_t-2-(i+1)-1] - phases[j_,N_t-2-(i+2)-1]  
+            # check if there is a jump in teh gradient
+            if(np.abs(grad_new-grad_ref) > 1E-7): 
+                # print(510-(i+1),grad_ref,grad_new)
+                # check if the jump is negative and it's NOT a folding
+                if(grad_new<0 and np.abs(grad_new)<1.9*np.pi):
+                    #print("A",N_t-2-(i+1),grad_ref,grad_new)
+                    #Evaluate gradients after the jump
+                    grad_new_ = phase_sec_order_aux[:,N_t-2-(i-2)] - phase_sec_order_aux[:,N_t-2-(i-3)]    
+                    #Identify the phase index with the gradient closest to the previous     one                
+                    new_index_grad = np.argmin(np.abs(grad_new_-grad_ref))            
+                    new_index_value = np.argmin(np.abs(phase_sec_order_aux[:,N_t-2-(i+1)-1] - phases[j_,N_t-2-(i+1)]))
+                    if(new_index_grad==new_index_value):
+                        phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_grad,0:N_t-2-(i+1)])
+                        #grad_ref = grad_new_[new_index_grad]
+                    else:
+                        phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_value,0:N_t-2-(i+1)])
+                    #grad_ref = grad_new_[new_index_grad]
+                # check if the jump is positive                
+                if(grad_new>0):
+                    #print("B",N_t-2-(i+1),grad_ref,grad_new,grad_new_2)
+                    #Evaluate gradients after the jump
+                    grad_new_ = phase_sec_order_aux[:,N_t-4-i] -    phase_sec_order_aux[:,N_t-5-i]
+                    grad_new_2 = phase_sec_order_aux[:,N_t-5-i] - phase_sec_order_aux[:,N_t-6-i]
+                    new_value = -grad_ref + phases[j_,N_t-2-(i+1)]
+                    #Identify the phase index with the gradient closest to the previous one
+                    new_index_grad = np.argmin(np.abs(grad_new_-grad_ref))
+                    new_index_value = np.argmin(np.abs(phase_sec_order_aux[:,N_t-2-(i+1)-1] - new_value))
+                    if(new_index_grad==new_index_value):
+                        phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_grad,0:N_t-2-(i+1)])
+                        #grad_ref = grad_new_[new_index_grad]
+                    else:
+                        phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_value,0:N_t-2-(i+1)])
+                        #grad_ref = grad_new_[new_index_grad]
+
+        #else:            
+            #grad_ref = np.copy(grad_new)
+ 
+    return phases
+
+
+def UnfoldingFloquetSpectrum_aux(L=1,dt=1.0,N_t=0,phi_t=0):
+    # Takes the time-evolution of the Floquet phases, defined with the eigenvalues of
+    # the time-evolution operator:
+    # Calculate U(t,t_0)
+    # evaluate the eigenvalues
+    # define the phase as
+    # phi(t) = atan(imag(eigenvalue)/real(eigenvalues))
+    # 
+    # HERE I DO PRELIMINAR UNTANGLING, BEFORE GOING STATE BY STATE
+    
+    time = np.linspace(1,N_t,N_t)
+    N_t_0 = 0 
+    N_t_  = N_t-1
+
+    phase_sec = phi_t[:,N_t_0:N_t_]
+    phase_sec[0,:]
+    phase_sec_=phase_sec
+
+    index_order_old = np.argsort(np.abs(phase_sec[:,0]))
+    phase_sec_order  = np.zeros(phase_sec.shape)
+    phase_sec_order_ = np.zeros(phase_sec.shape)
+    phase_sec_ = phase_sec[index_order_old,:]
+    phase_sec = phase_sec_    
+    index_order_old = np.argsort(np.abs(phase_sec[:,0]))
+
+    i_l = 0
+    i_r = N_t
+
+    flag = 0
+    kinks = []
+    order_ = np.empty([0,L],dtype=np.int)
+    swap_counter= np.empty([0],dtype=np.int)
+    r = 1
+    for i in range(phase_sec.shape[1]):
+        swap_flag = False
+        index_order_new = np.argsort(np.abs(phase_sec[:,i]))
+        if(index_order_new[0] != index_order_old[0]):
+            index_ = index_order_old[L-1]
+            grad_last = (phase_sec[index_,i-1] - phase_sec[index_,i-2])/dt
+            phase_future = np.real(grad_last*dt + phase_sec[index_,i-1])
+            grad_ = (phase_sec[:,i-1] - phase_sec[:,i-2])/dt
+            phase_ = np.real(grad_*dt + phase_sec[:,i-1])
+            #print(i,phase_future)
+            if(phase_future > 2.0*np.pi):
+                swap_flag= True
+                if(index_order_new[0] == index_order_old[L-1]):
+                    kinks = np.append(kinks,[np.int(i)])
+                    order_ = np.append(order_,index_order_new)
+                    swap_counter = np.append(swap_counter,np.array(np.where(phase_>2.0*np.pi)).size)
+
+                if(index_order_new[0] != index_order_old[L-1]):
+                    kinks = np.append(kinks,[np.int(i)])
+                    order_ = np.append(order_,[index_order_new])
+                    swap_counter = np.append(swap_counter,np.array(np.where(phase_>2.0*np.pi)).size)
+        phase_sec_order[:,i] = np.sort(np.abs(phase_sec[:,i]))
+        index_order_old = index_order_new
+
+    phase_sec_order_ = np.zeros(phase_sec_order.shape)
+    phase_sec_order_[:] = phase_sec_order[:]
+    
+    l=0
+    i_l = 0
+    for i in range(kinks.size-1):
+        l += 1
+        i_r = np.int(kinks[i])
+        phase_sec_order_[:,i_l:i_r] = np.roll(phase_sec_order[:,i_l:i_r],-l,axis=0)
+        i_l = i_r
+        
+    if(kinks.size == 1):
+        i_r = np.int(kinks[0])
+
+    i_l = i_r
+    i_r = phase_sec_order.shape[1]
+    phase_sec_order_[:,i_l:i_r] = np.roll(phase_sec_order[:,i_l:i_r],-l-1,axis=0)
+    
+    
+    counter = 0
+    phase_sec_order_aux = np.copy(phase_sec_order_)
+    phase_sec_order__   = np.copy(phase_sec_order_)
+    grad_old = phase_sec_order_[:,1] - phase_sec_order_[:,0]
+    index_order_old = np.argsort(np.abs(grad_old))
+
+    swap_time_old = [0,0,0]
+    swap_time_new = [0,0,0]
+    for i in range(phase_sec_order_aux.shape[1]-2):   
+        grad_new = phase_sec_order_aux[:,i+2] - phase_sec_order_aux[:,i+1]    
+        dgrad = grad_new-grad_old
+        index_order_old = np.argsort(np.abs(grad_old))
+        index_order_new = np.argsort(np.abs(grad_new))
+        #  COMPARE GRADIENTS. IF THEY ARE DIFFERENT, THERE WAS A COLLISION        
+        swap_flag = False
+        if(np.linalg.norm(grad_new-grad_old)<1.999*np.pi): 
+            swap_flag = True
+            swap_index     = np.argsort(np.abs(dgrad))[L-2:L]
+            
+        if(np.linalg.norm(grad_new-grad_old)>1.999*np.pi): 
+            swaps_counter = np.array((np.where(np.abs(dgrad)>1E-6)))[0,:]
+            if(swaps_counter.size>1 and np.mod(swaps_counter.size,2) == 1):            
+                if(swaps_counter.size>1):
+                    swap_flag      = True
+                    swap_index     = np.argsort(np.abs(grad_new-grad_old))[L-3:L-1]        
+        if(np.linalg.norm(grad_new-grad_old)>5.6E-4 and np.linalg.norm(grad_new-    grad_old)<1.999*np.pi):
+        # THE COLLIDING PARTICLES CHANGE THEIR GRADIENT THE MOST
+            swap_time_new  = [i+2,swap_index[0],swap_index[1]]
+            if(swap_time_new[0] == swap_time_old[0]+1 and swap_time_new[2]==swap_time_old[1] and swap_time_new[1]==swap_time_old[2]):
+                a=1
+            else:
+                phase_sec_order_aux[swap_index[0],i+1::] = np.copy(phase_sec_order__[swap_index[1],i+1::]) 
+                phase_sec_order_aux[swap_index[1],i+1::] = np.copy(phase_sec_order__[swap_index[0],i+1::]) 
+                grad_new = phase_sec_order_aux[:,i+2] - phase_sec_order_aux[:,i+1]
+                phase_sec_order__ = np.copy(phase_sec_order_aux)
+                swap_time_old  = swap_time_new
+        grad_old = grad_new
+
+
+    grad_new_ = np.zeros([L,N_t],dtype=np.float32)
+    for i in range(phase_sec_order_aux.shape[1]-2):   
+        grad_new_[:,i+1] = phase_sec_order_aux[:,i+1] - phase_sec_order_aux[:,i]    
+    
+    return phase_sec_order_aux
+
 
 def FloquetStroboscopicOperatorV4(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,BlochSpectrum=0,RealSpaceWavefun=0):
     # Solve the Schrodinger equation for a subset of the bands:
