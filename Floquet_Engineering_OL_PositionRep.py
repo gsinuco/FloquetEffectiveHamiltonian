@@ -575,13 +575,29 @@ plt.xlabel('time', fontsize=14)
 plt.show()
 
 #%%
+# saving:
+#f = open("UnfoldingFloquetL32N_t1024.dat", "w")
+#f.write("# phi_t[32:8192] time evolution of the phase\n#eigenvalues\n#eigenenergies#\n#transformation\n")        # column names
+#np.savetxt(f, phi_t.T)
+#np.savetxt(f, lambda_u.T)
+#np.savetxt(f, e_u.T)
+#np.savetxt(f, U)
+#np.savetxt(f, phase_sec_order_aux)
+#%% 
+f = f = open("UnfoldingFloquetL32N_t1024.dat", "r")
 
+phi_t    = np.loadtxt(f, dtype=complex,max_rows=32768,unpack=True)
+lambda_u = np.loadtxt(f, dtype=complex,max_rows=32,unpack=True)
+e_u      = np.loadtxt(f, dtype=complex,max_rows=32,unpack=True)
+U        = np.loadtxt(f, dtype=complex,max_rows=32,unpack=True)
+phase_sec_order_aux_ = np.loadtxt(f, dtype=complex,max_rows=32736,unpack=True)
+#%%
 phases = np.copy(phase_sec_order_aux)
-for j_ in [0]:#range(L):
+for j_ in [25]:#range(L):
     i  = N_t-2      
     grad_ref = phase_sec_order_aux[j_,i] - phase_sec_order_aux[j_,i-1]
     
-    for i in range(223):#range(N_t-2):#range(phase_sec_order_aux.shape[1]-2):   
+    for i in range(N_t-2):#range(phase_sec_order_aux.shape[1]-2):   
         grad_new   = phases[j_,N_t-2-(i+1)]   - phases[j_,N_t-2-(i+2)]  
         grad_new_2 = phases[j_,N_t-2-(i+1)-1] - phases[j_,N_t-2-(i+2)-1]  
         # check if there is a jump in teh gradient
@@ -599,11 +615,17 @@ for j_ in [0]:#range(L):
                 #print(np.argmin(np.abs(phase_sec_order_aux[:,510-(i+1)-1] - phases[0,510-(i+1)])))
                 new_index_grad = np.argmin(np.abs(grad_new_-grad_ref))            
                 new_index_value = np.argmin(np.abs(phase_sec_order_aux[:,N_t-2-(i+1)-1] - phases[j_,N_t-2-(i+1)]))
-            
+                print(new_index_grad,new_index_value)
                 #print(phase_sec_order_aux[new_index_grad,N_t-2-(i+1)-1] - phases[0,N_t-2-(i+1)],
                 #phase_sec_order_aux[new_index_value,N_t-2-(i+1)-1] - phases[0,N_t-2-(i+1)])
-                phases[j_,0:N_t-3-i] = np.copy(phase_sec_order_aux[new_index_grad,0:N_t-3-i])
-                grad_ref = grad_new_[new_index_grad]
+                if(new_index_grad==new_index_value):
+                        phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_grad,0:N_t-2-(i+1)])
+                        #grad_ref = grad_new_[new_index_grad]
+                else:
+                        phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_value,0:N_t-2-(i+1)])
+
+                #phases[j_,0:N_t-3-i] = np.copy(phase_sec_order_aux[new_index_grad,0:N_t-3-i])
+                #grad_ref = grad_new_[new_index_grad]
                 # check if the jump is positive
             if(grad_new>0):
                     print("B",N_t-2-(i+1),grad_ref,grad_new,grad_new_2)
@@ -628,23 +650,23 @@ for j_ in [0]:#range(L):
                         phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_value,0:N_t-2-(i+1)])
                         #grad_ref = grad_new_[new_index_grad]
 
-        else:            
-            grad_ref = np.copy(grad_new)
+        #else:            
+            #grad_ref = np.copy(grad_new)
 
-
-plt.plot(np.transpose(phases[0,:]), "-")
-plt.plot(np.transpose(phase_sec_order_aux[8,i_l:i_r]),".")
-plt.plot(np.transpose(phase_sec_order_aux[4,i_l:i_r]),".")
-plt.plot(np.transpose(phase_sec_order_aux[24,i_l:i_r]),".")
-#plt.plot(np.transpose(phase_sec_order_aux[0,i_l:i_r]),".")
-#plt.plot(np.transpose(phase_sec_order_aux[13,i_l:i_r]),".")
+#%%
+plt.plot(np.transpose(phases[25,:]), "-")
+#plt.plot(np.transpose(phase_sec_order_aux[2,i_l:i_r]),".")
+#plt.plot(np.transpose(phase_sec_order_aux[4,i_l:i_r]),".")
+#plt.plot(np.transpose(phase_sec_order_aux[5,i_l:i_r]),".")
+#plt.plot(np.transpose(phase_sec_order_aux[22,i_l:i_r]),".")
+#plt.plot(np.transpose(phase_sec_order_aux[19,i_l:i_r]),".")
 #plt.plot(np.transpose(phase_sec_order_aux[6,i_l:i_r]),".")
 #plt.plot(np.transpose(phase_sec_order_aux[12,i_l:i_r]),".")
 #plt.plot(np.transpose(phase_sec_order_aux[8,i_l:i_r]),".")
 #plt.plot(np.transpose(phase_sec_order_aux[4,i_l:i_r]),".")
-plt.xlim(790,800)
+#plt.xlim(630,640)
 #plt.xlim(790,1024)
-plt.ylim(2.1,2.4)
+#plt.ylim(5,5.6)
 plt.ylabel('phase', fontsize=14)
 plt.xlabel('time', fontsize=14)
 plt.show()
