@@ -364,7 +364,7 @@ def FloquetStroboscopicOperatorV3(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,Bloch
     t = t0
     lambda_u_t = np.zeros(N_Bands*L,dtype=np.complex)
     phi_t      = np.zeros([N_Bands*L,N_t],dtype=np.complex)
-    while solver.successful() and solver.t<t1  and i_+1<N_t:
+    while solver.successful() and solver.t<=t1  and i_+1<N_t:
         for j_ in range(int(N_Bands*L)):
             solver.set_initial_value(U_T[:,j_],t).set_f_params(E_0,x,OL,U_x)
             U_T[:,j_] = solver.integrate(solver.t+dt)        
@@ -488,8 +488,19 @@ def FloquetStroboscopicOperator(N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,BlochSpectr
 
     return U_T,U_x#,psi_t_
 
+def EffectiveFloquetHamiltonian(e_u=0,U=0,U_x=0):
+    H_eff_F = np.diag(e_u) 
 
-def EffectiveFloquetHamiltonian(U_T = 0, DT = 1.0,U_x = 0.0):
+    #Transformation from the Floquet basis to the basis of Bloch states
+    H_eff_kn = U@H_eff_F@np.transpose(np.conjugate(U))#np.transpose(np.conjugate(U))@H_eff_F@U
+
+    #Transformation from the Bloch basis to the basis of position
+    H_eff_x = U_x@H_eff_kn@np.transpose(np.conjugate(U_x))
+    
+    return H_eff_x
+
+
+def FloquetSpectrum(U_T = 0, DT = 1.0,U_x = 0.0):
     #################################################################
     ####  EFFECTIVE FLOQUET HAMILTONIAN OPERATOR ####################   
     #################################################################
@@ -549,10 +560,10 @@ def EffectiveFloquetHamiltonian(U_T = 0, DT = 1.0,U_x = 0.0):
     #plt.plot(k,e_u,k,BlochSpectrum[:,0])
     #plt.show()
     
-    H_eff_F = np.diag(e_u) # Effective Hamiltonian in the basis Floquet states
+    #H_eff_F = np.diag(e_u) # Effective Hamiltonian in the basis Floquet states
     
     #Transformation from the Floquet basis to the basis of Bloch states
-    H_eff_kn = U@H_eff_F@np.transpose(np.conjugate(U))#np.transpose(np.conjugate(U))@H_eff_F@U
+    #H_eff_kn = U@H_eff_F@np.transpose(np.conjugate(U))#np.transpose(np.conjugate(U))@H_eff_F@U
     
     #U_x = np.empty([N_x,N_Bands*(L+1)],dtype=np.complex)
     
@@ -565,12 +576,12 @@ def EffectiveFloquetHamiltonian(U_T = 0, DT = 1.0,U_x = 0.0):
     #for n in range(N_Bands):
     #    U_x[:,n*(L+1):(n+1)*(L+1)] = np.reshape(RealSpaceWavefun[:,n],[N_x,L+1])
     
-    H_eff_x = U_x@H_eff_kn@np.transpose(np.conjugate(U_x))
+    #H_eff_x = U_x@H_eff_kn@np.transpose(np.conjugate(U_x))
     
     #V_eff_x = np.diag(H_eff_x) #- np.diag(KineticEnergy)
     
     #plt.plot(x,V_eff_x)
     #plt.show()
     
-    return lambda_u,U,e_u,H_eff_kn,H_eff_x
+    return lambda_u,U,e_u
         
