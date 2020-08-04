@@ -9,6 +9,7 @@ Created on Mon May 18 20:44:12 2020
 #%%
 
 import numpy as np
+import numpy.ma as ma
 import OpticalLatticeModule as OLM
 from scipy.integrate import ode
 from scipy.integrate import complex_ode
@@ -50,22 +51,28 @@ def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0):
     # define the phase as
     # phi(t) = atan(imag(eigenvalue)/real(eigenvalues))
     # 
-
+    
+    # This array controls whether a phi[t,L] is assigned or not
+    # The searches to minimise the kinks should be 
+    # done among not used phases (False)    
+    phase_mask    = np.empty([N_t,L],dtype=np.bool)
+    phase_mask[:] = False
+    
     phase_sec_order,phase_sec_order_,phase_sec_order_aux = UnfoldingFloquetSpectrum_aux(L,dt,N_t,phi_t)
 
     phase_sec_order_aux = np.copy(np.real(phase_sec_order))
     phases = np.copy(phase_sec_order_aux)
     i  = N_t-2      
-    grad_ref_ = phase_sec_order_aux[:,i] - phase_sec_order_aux[:,i-1]
+    #grad_ref_ = phase_sec_order_aux[:,i] - phase_sec_order_aux[:,i-1]
 
     for j_ in range(L):
         i  = N_t-2      
         grad_ref = phase_sec_order_aux[j_,i] - phase_sec_order_aux[j_,i-1]
-    
+        phase_mask[i,j_] = True
         for i in range(N_t-2):#range(phase_sec_order_aux.shape[1]-2):   
             now = N_t-2-(i+1)
             grad_new   = phases[j_,N_t-2-(i+1)]   - phases[j_,N_t-2-(i+1)-1]  
-            grad_new_2 = phases[j_,N_t-2-(i+1)-1] - phases[j_,N_t-2-(i+1)-2]  
+            #grad_new_2 = phases[j_,N_t-2-(i+1)-1] - phases[j_,N_t-2-(i+1)-2]  
             # check if there is a jump in teh gradient
             if(np.abs(grad_new-grad_ref) > 1E-7): 
                 # print(510-(i+1),grad_ref,grad_new)
@@ -75,27 +82,35 @@ def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0):
                     #print(phases[j_,N_t-2-(i+1)], phases[j_,N_t-2-(i+1)-1] )
                     #Evaluate gradients after the jump
                     #grad_new_ = phase_sec_order_aux[:,N_t-2-(i-2)] - phase_sec_order_aux[:,N_t-2-(i-3)]    
-                    grad_now_ = phase_sec_order_aux[:,N_t-2-(i+1)]   - phase_sec_order_aux[:,N_t-2-(i+1)-1]    
+                    #grad_now_ = phase_sec_order_aux[:,N_t-2-(i+1)]   - phase_sec_order_aux[:,N_t-2-(i+1)-1]    
                     grad_new_ = phase_sec_order_aux[:,N_t-2-(i+1)-1] - phase_sec_order_aux[:,N_t-2-(i+1)-2]    
                     new_hyp_grad = phases[j_,now] - phase_sec_order_aux[:,now-1]
                     #print(new_hyp_grad)
                     #Identify the phase index with the gradient closest to the previous     one                 
-                    new_index_hypgrad = np.argmin(np.abs(grad_ref-new_hyp_grad))
-                    new_index_gnow  = np.argmin(np.abs(grad_now_-grad_ref))    
-                    new_index_grad  = np.argmin(np.abs(grad_new_-grad_ref))            
+                    mx_aux = np.abs(grad_ref-new_hyp_grad)
+                    mx    =  ma.masked_array(mx_aux,mask=phase_mask[now-1,:])                        
+                    new_index_hypgrad = np.argmin(mx)
+
+                    #new_index_hypgrad = np.argmin(np.abs(grad_ref-new_hyp_grad))
+                    #new_index_gnow  = np.argmin(np.abs(grad_now_-grad_ref))    
+                    #new_index_grad  = np.argmin(np.abs(grad_new_-grad_ref))            
                     #new_index_value = np.argmin(np.abs(phase_sec_order_aux[:,N_t-2-(i+1)-1] - phases[j_,N_t-2-(i+1)]))
+                    
                     phase_future    = -grad_ref + phases[j_,N_t-2-(i+1)]
-                    new_index_value = np.argmin(np.abs(phase_future - phase_sec_order_aux[:,N_t-2-(i+1)-1]))
+                    mx_aux = np.abs(phase_future - phase_sec_order_aux[:,N_t-2-(i+1)-1])
+                    mx    =  ma.masked_array(mx_aux,mask=phase_mask[now-1,:])                        
+                    new_index_value = np.argmin(mx)
+                    #new_index_value = np.argmin(np.abs(phase_future - phase_sec_order_aux[:,N_t-2-(i+1)-1]))
                     #print(phase_sec_order_aux[j_,N_t-2-(i+1)],phase_future , phase_sec_order_aux[:,N_t-2-(i+1)-1])
                     #print(new_index_grad,new_index_value,new_index_gnow)#,new_index_phaseFuture)
                     
                     if(phase_future > 0):
                         phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_hypgrad,0:N_t-2-(i+1)])
-
+                        phase_mask[now-1,new_index_hypgrad] = True
                     if(phase_future < 0):                        
-                        new_hyp_grad = phase_sec_order_aux[:,now-1] - phase_sec_order_aux[:,now-2]
-                        grad_now     = phases[j_,now]   - phase_sec_order_aux[:,now-1]
-                        new_index_hypgrad = np.argmin(np.abs(grad_ref-new_hyp_grad))
+                        #new_hyp_grad = phase_sec_order_aux[:,now-1] - phase_sec_order_aux[:,now-2]
+                        #grad_now     = phases[j_,now]   - phase_sec_order_aux[:,now-1]
+                        #new_index_hypgrad = np.argmin(np.abs(grad_ref-new_hyp_grad))
                         #print(grad_now)
                         #print(new_hyp_grad)
                         #print(np.argmax(phase_sec_order_aux[:,now-1]))
@@ -114,8 +129,11 @@ def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0):
                         # 2pi, the less negative should be mapped to the largest value 
                         # close to 2pi
                         #-grad_ref_ 
-                        new_index_hypgrad = np.argmin(np.abs(phase_sec_order_aux[:,now-1] - (2.0*np.pi + phase_future)))
-                                             
+                        mx_aux = np.abs(phase_sec_order_aux[:,now-1] - (2.0*np.pi + phase_future))
+                        mx    =  ma.masked_array(mx_aux,mask=phase_mask[now-1,:])                        
+                        new_index_hypgrad = np.argmin(mx)
+                        phase_mask[now-1,new_index_hypgrad] = True
+                        #new_index_hypgrad = np.argmin(np.abs(phase_sec_order_aux[:,now-1] - (2.0*np.pi + phase_future)))                                             
                         phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_hypgrad,0:N_t-2-(i+1)])
                     
                     #print(new_index_hypgrad,phase_future)
@@ -130,21 +148,37 @@ def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0):
                     #print("B",N_t-2-(i+1),grad_ref,grad_new,grad_new_2)
                     #Evaluate gradients after the jump
                     grad_new_ = phase_sec_order_aux[:,N_t-4-i] -    phase_sec_order_aux[:,N_t-5-i]
-                    grad_new_2 = phase_sec_order_aux[:,N_t-5-i] - phase_sec_order_aux[:,N_t-6-i]
-                    new_value = -grad_ref + phases[j_,N_t-2-(i+1)]
+                    #grad_new_2 = phase_sec_order_aux[:,N_t-5-i] - phase_sec_order_aux[:,N_t-6-i]
+                    
                     #Identify the phase index with the gradient closest to the previous one
-                    new_index_grad = np.argmin(np.abs(grad_new_-grad_ref))
-                    new_index_value = np.argmin(np.abs(phase_sec_order_aux[:,N_t-2-(i+1)-1] - new_value))
+                    mx_aux         = np.abs(grad_new_-grad_ref)
+                    mx             = ma.masked_array(mx_aux,mask=phase_mask[now-1,:])                    
+                    new_index_grad = np.argmin(mx)
+                    #new_index_grad = np.argmin(np.abs(grad_new_-grad_ref))
+                    
+                    new_value = -grad_ref + phases[j_,N_t-2-(i+1)]
+                    mx_aux          = np.abs(phase_sec_order_aux[:,N_t-2-(i+1)-1] - new_value)
+                    mx              = ma.masked_array(mx_aux,mask=phase_mask[now-1,:])                    
+                    new_index_value = np.argmin(mx)
+                    #new_index_value = np.argmin(np.abs(phase_sec_order_aux[:,N_t-2-(i+1)-1] - new_value))
+                    
                     phase_future    = -grad_ref + phases[j_,N_t-2-(i+1)]
                     if(phase_future > 0):
                         if(new_index_grad==new_index_value):
                             phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_grad,0:N_t-2-(i+1)])
+                            phase_mask[now-1,new_index_grad] = True
                         #grad_ref = grad_new_[new_index_grad]
                         else:
                             phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_value,0:N_t-2-(i+1)])
+                            phase_mask[now-1,new_index_value] = True
+
                         #grad_ref = grad_new_[new_index_grad]
                     if(phase_future < 0):
-                        new_index_hypgrad = np.argmin(np.abs(phase_sec_order_aux[:,now-1] - (2.0*np.pi + phase_future)))
+                        mx_aux = np.abs(phase_sec_order_aux[:,now-1] - (2.0*np.pi + phase_future))
+                        mx    =  ma.masked_array(mx_aux,mask=phase_mask[now-1,:])                        
+                        new_index_hypgrad = np.argmin(mx)
+                        phase_mask[now-1,new_index_hypgrad] = True
+                        #new_index_hypgrad = np.argmin(np.abs(phase_sec_order_aux[:,now-1] - (2.0*np.pi + phase_future)))
                         phases[j_,0:N_t-2-(i+1)] = np.copy(phase_sec_order_aux[new_index_hypgrad,0:N_t-2-(i+1)])
         #else:            
             #grad_ref = np.copy(grad_new)
@@ -165,7 +199,7 @@ def UnfoldingFloquetSpectrum_aux(L=1,dt=1.0,N_t=0,phi_t=0):
     # Takes the time-evolution of the Floquet phases, defined with the eigenvalues of
     # the time-evolution operator:
     # Calculate U(t,t_0)
-    # evaluate the eigenvalues
+    # evaluate the ei genvalues
     # define the phase as
     # phi(t) = atan(imag(eigenvalue)/real(eigenvalues))
     # 

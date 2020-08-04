@@ -40,7 +40,7 @@ omega    = 5.0  # the second factor is the frequency in scaled units
 #################################################################
 # Set the parameter of the Bloch spectrum
 Bands = 3  # Number of bands to evaluate
-L     = 16 # number of unit cells
+L     = 32 # number of unit cells
 N_x   = 32 # Number of points in a unit cell
 dx    = 1.0/N_x
 x     = np.linspace(0, L, N_x*L)
@@ -61,8 +61,8 @@ plt.show()
 ########  SCHRODINGER EQUATION ##################################
 #################################################################
 # Solve the Schrodinger equation for a subset of the bands:
-N_Bands = 1   # number of bands to include in the Schrodinger equation
-N_t     = 1024 # number of time steps
+N_Bands = 3   # number of bands to include in the Schrodinger equation
+N_t     = 2048 # number of time steps
 
 t0   = 0                 # initial time
 DT   = 2.0*np.pi/(omega) # total time to integrate
@@ -88,26 +88,27 @@ print(end - start)
 ########  UNFOLDING THE FLOQUET SPECTRUM ########################
 #################################################################
 # The final value of the phase give us the energy folded
-phases,folding_counter,phase_sec_order,phase_sec_order_,phase_sec_order_aux = FEH.UnfoldingFloquetSpectrum(L*N_Bands,dt,N_t,phi_t)
-e_u_unfolded = e_u + folding_counter
-            
-#grad_new_ = np.zeros([L*N_Bands,N_t],dtype=np.float32)
-#for i in range(phi_t.shape[1]-2):   
-#        grad_new_[:,i+1] = phi_t[:,i+1] - phi_t[:,i]    
-    
-#folding_counter = np.zeros([phi_t.shape[0]],dtype=np.int32)
-#for i in range(phi_t.shape[0]):   
-#        folding_counter[i] = np.array(np.where(grad_new_[i,:]<-np.pi)).size
-
+#phases,folding_counter,phase_sec_order,phase_sec_order_,phase_sec_order_aux = #FEH.UnfoldingFloquetSpectrum(L*N_Bands,dt,N_t,phi_t)
 #e_u_unfolded = e_u + folding_counter*omega
+            
+grad_new_ = np.zeros([L*N_Bands,N_t],dtype=np.float32)
+for i in range(phi_t.shape[1]-2):   
+        grad_new_[:,i+1] = phi_t[:,i+1] - phi_t[:,i]    
+    
+folding_counter = np.zeros([phi_t.shape[0]],dtype=np.int32)
+for i in range(phi_t.shape[0]):   
+        folding_counter[i] = np.array(np.where(grad_new_[i,:]<-np.pi)).size
+e_u_unfolded = e_u + folding_counter*omega
  
-plt.plot(np.transpose(phi_t[:,:]),".-")
+plt.plot(np.transpose(phi_t[:,0:2047]),".-")
 #plt.xlim(250,256)#plt.xlim(500,512)
+#plt.xlim(1,2)
+#plt.ylim(0.025,0.06)
 plt.show()
 
-plt.plot(np.transpose(phases[6,:]),".-")
-#plt.xlim(250,256)
-plt.show()
+#plt.plot(np.transpose(phases[0,:]),"-")
+#plt.xlim(2030,2048)
+#plt.show()
 #%%
 #################################################################
 ########  CALCULATE EFFECTIVE HAMILTONIAN #######################
@@ -119,10 +120,10 @@ H_eff_x_u = FEH.EffectiveFloquetHamiltonian(e_u_unfolded,U,U_x)
 
 
 plt.plot(x,np.diag(H_eff_x/dx) - np.min(np.diag(H_eff_x/dx)),"-")
-plt.plot(x,np.diag(H_eff_x_u/dx) -np.min(np.diag(H_eff_x_u/dx)))
+plt.plot(x,np.diag(H_eff_x_u/dx) - np.min(np.diag(H_eff_x_u/dx)))
 plt.ylabel('V(x)', fontsize=15)
 plt.xlabel('x', fontsize=15)
-#plt.xlim(10,20)
+plt.xlim(10,20)
 plt.show()
 
 plt.contourf(np.abs(H_eff_x))
@@ -141,17 +142,17 @@ plt.xlabel('x', fontsize=16)
 plt.colorbar()
 plt.show()
 #%%
-#plt.plot(BlochSpectrum-np.min(BlochSpectrum),"-.")
+plt.plot(BlochSpectrum-np.min(BlochSpectrum),"-.")
 plt.plot(np.sort(e_u),".-")
 #plt.plot(e_u+50)
-plt.plot(np.sort(e_u_unfolded),"*-")
+plt.plot(np.sort(e_u_unfolded),".-")
 #plt.xlim(0,20)
-#plt.ylim(0,10)
+#plt.ylim(0,20)
 plt.show()
 
 #%%
 # saving:
-f = open("UnfoldingFloquetTEST.dat", "w")
+f = open("UnfoldingFloquetL32Nt2048_N_Band3.dat", "w")
 #f.write("# phi_t[8:256] time evolution of the phase\n#eigenvalues\n#eigenenergies#\n#transformation\n")        # column names
 np.savetxt(f, phi_t)
 np.savetxt(f, lambda_u.T)
@@ -159,7 +160,7 @@ np.savetxt(f, e_u.T)
 np.savetxt(f, U)
 
 f.close()
-%%
+#%%
 f = open("UnfoldingFloquetTEST.dat", "r")
 
 phi_t    = np.loadtxt(f, dtype=complex,max_rows=L,unpack=True).T
