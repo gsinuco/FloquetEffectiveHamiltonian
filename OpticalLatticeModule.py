@@ -61,8 +61,8 @@ def Schrodinger_RHS(t,psi,E_0,x,OL,U_kn): # for ode
     t_   = OL.omega*t
     jj   = np.complex(0.0,1.0)
     H_0  = np.diag(E_0)
-    #V    = U_t(t_,x,OL,U_kn)
-    H    = H_0 #+ V
+    V    = U_t(t_,x,OL,U_kn)
+    H    = H_0 + V
     #print(t_)
     dpsidt_RHS = -jj*H@psi
     

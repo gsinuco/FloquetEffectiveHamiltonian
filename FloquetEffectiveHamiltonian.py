@@ -60,7 +60,7 @@ def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0):
     
     phase_sec_order,phase_sec_order_,phase_sec_order_aux = UnfoldingFloquetSpectrum_aux(L,dt,N_t,phi_t)
 
-    phase_sec_order_aux = np.copy(np.real(phase_sec_order))
+    phase_sec_order_aux = np.copy(np.real(phase_sec_order_))
     phases = np.copy(phase_sec_order_aux)
     i  = N_t-2      
     #grad_ref_ = phase_sec_order_aux[:,i] - phase_sec_order_aux[:,i-1]
@@ -192,7 +192,9 @@ def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0):
     for i in range(phases.shape[0]):   
         swaps_counter[i] = np.array(np.where(grad_new_[i,:]<-np.pi)).size
         #print(swaps_counter)
-    return phases,swaps_counter,phase_sec_order,phase_sec_order_,phase_sec_order_aux
+        
+    
+    return phase_sec_order_aux,swaps_counter,phase_sec_order,phase_sec_order_,phase_sec_order_aux
 
 
 def UnfoldingFloquetSpectrum_aux(L=1,dt=1.0,N_t=0,phi_t=0):

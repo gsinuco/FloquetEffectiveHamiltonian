@@ -28,7 +28,7 @@ jj = np.complex(0.0,1.0)
             
 # Set the parameter of the static optical lattice parametrised by
 # V(x) = (V_0/2) cos(2*k_x  x  +  2.0*phase)
-V_0      = 20.0 # ~ Band gap
+V_0      = 0.001 # ~ Band gap
 phase_x  = 0.0  # spatial phase
 OL       = OLM.OpticalLattice(V_0,phase_x)
 
@@ -40,7 +40,7 @@ omega    = 5.0  # the second factor is the frequency in scaled units
 #################################################################
 # Set the parameter of the Bloch spectrum
 Bands = 3  # Number of bands to evaluate
-L     = 32 # number of unit cells
+L     = 32# # number of unit cells
 N_x   = 32 # Number of points in a unit cell
 dx    = 1.0/N_x
 x     = np.linspace(0, L, N_x*L)
@@ -50,9 +50,12 @@ k_u = np.empty(Bands*L)
 for i in range(Bands*L):
     k_u[i] = BW.get_k(RealSpaceBlochWavefun[:, i], N_x)
 
-plt.plot(k_u,BlochSpectrum,".")
+plt.plot(BlochSpectrum,".-")
+#plt.plot(k_u,k_u*k_u,"-")
+#plt.plot(k_u,4*(k_u+np.pi)*(k_u+np.pi)+np.pi*np.pi,".")
 plt.ylabel('Energy', fontsize=18)
 plt.xlabel('k', fontsize=16)
+#plt.ylim(0,11.5)
 plt.show()
 
 
@@ -71,7 +74,7 @@ dt   = DT/N_t            # time step
 t    = np.linspace(t0,t0+DT, N_t) 
 U_x = RealSpaceBlochWavefun[:,0:N_Bands*L]
 U_T = np.zeros([N_Bands*L,N_Bands*L],dtype=np.complex)
-   
+#%%   
 # TO DO:
 # The integrator is too slow, it requires a large number of time steps (> 4096)
 # for an accurate time-evolution (~10^-3) 
@@ -83,32 +86,51 @@ lambda_u,U,e_u = FEH.FloquetSpectrum(U_T,DT,U_x)
 end = time.time()
 print(end - start)
 
+# saving:
+f = open("UnfoldingFloquetL16Nt2048_N_Band3.dat", "w")
+#f.write("# phi_t[8:256] time evolution of the phase\n#eigenvalues\n#eigenenergies#\n#transformation\n")        # column names
+np.savetxt(f, phi_t)
+np.savetxt(f, lambda_u.T)
+np.savetxt(f, e_u.T)
+np.savetxt(f, U)
+
+f.close()
+
+
 #%%
 #################################################################
 ########  UNFOLDING THE FLOQUET SPECTRUM ########################
 #################################################################
 # The final value of the phase give us the energy folded
-#phases,folding_counter,phase_sec_order,phase_sec_order_,phase_sec_order_aux = #FEH.UnfoldingFloquetSpectrum(L*N_Bands,dt,N_t,phi_t)
-#e_u_unfolded = e_u + folding_counter*omega
-            
-grad_new_ = np.zeros([L*N_Bands,N_t],dtype=np.float32)
-for i in range(phi_t.shape[1]-2):   
-        grad_new_[:,i+1] = phi_t[:,i+1] - phi_t[:,i]    
-    
-folding_counter = np.zeros([phi_t.shape[0]],dtype=np.int32)
-for i in range(phi_t.shape[0]):   
-        folding_counter[i] = np.array(np.where(grad_new_[i,:]<-np.pi)).size
+phases,folding_counter,phase_sec_order,phase_sec_order_,phase_sec_order_aux = FEH.UnfoldingFloquetSpectrum(L*N_Bands,dt,N_t,phi_t)
 e_u_unfolded = e_u + folding_counter*omega
+            
+#grad_new_ = np.zeros([L*N_Bands,N_t],dtype=np.float32)
+#for i in range(phi_t.shape[1]-2):   
+#        grad_new_[:,i+1] = phi_t[:,i+1] - phi_t[:,i]    
+    
+#folding_counter = np.zeros([phi_t.shape[0]],dtype=np.int32)
+#for i in range(phi_t.shape[0]):   
+#        folding_counter[i] = np.array(np.where(grad_new_[i,:]<-np.pi)).size
+#e_u_unfolded = e_u + folding_counter*omega
  
-plt.plot(np.transpose(phi_t[:,0:2047]),".-")
+plt.plot(t,np.transpose(phi_t[:,0:2048]),"-")
 #plt.xlim(250,256)#plt.xlim(500,512)
-#plt.xlim(1,2)
+#plt.xlim(0,0.2)
 #plt.ylim(0.025,0.06)
+plt.ylabel("phase (rads)")
+plt.xlabel("time")
 plt.show()
-
-#plt.plot(np.transpose(phases[0,:]),"-")
+#%%
+plt.plot(t[0:2047],np.transpose(phases[5 ,:]),".-")
+plt.plot(t[0:2047],np.transpose(phases[10,:]),"-")
+plt.plot(t[0:2047],np.transpose(phases[15,:]),"-")
 #plt.xlim(2030,2048)
-#plt.show()
+#plt.xlim(0,0.001)
+#plt.ylim(0,0.2)
+plt.ylabel("phase (rads)")
+plt.xlabel("time")
+plt.show()
 #%%
 #################################################################
 ########  CALCULATE EFFECTIVE HAMILTONIAN #######################
@@ -123,31 +145,33 @@ plt.plot(x,np.diag(H_eff_x/dx) - np.min(np.diag(H_eff_x/dx)),"-")
 plt.plot(x,np.diag(H_eff_x_u/dx) - np.min(np.diag(H_eff_x_u/dx)))
 plt.ylabel('V(x)', fontsize=15)
 plt.xlabel('x', fontsize=15)
-plt.xlim(10,20)
+#plt.xlim(10,20)
 plt.show()
 
-plt.contourf(np.abs(H_eff_x))
-plt.ylabel('y', fontsize=18)
-plt.xlabel('x', fontsize=16)
+plt.contourf(x,x,np.abs(H_eff_x))
+plt.ylabel("x'", fontsize=16)
+plt.xlabel("x", fontsize=16)
 plt.colorbar()
 #plt.xlim(1000,1200)
 #plt.ylim(1000,1200)
 plt.show()
 
-plt.contourf(np.abs(H_eff_x_u))
-plt.ylabel('y', fontsize=18)
-plt.xlabel('x', fontsize=16)
+plt.contourf(x,x,np.abs(H_eff_x_u))
+plt.ylabel("x'", fontsize=16)
+plt.xlabel("x", fontsize=16)
 #plt.xlim(1000,1200)
 #plt.ylim(1000,1200)
 plt.colorbar()
 plt.show()
 #%%
-plt.plot(BlochSpectrum-np.min(BlochSpectrum),"-.")
+plt.plot(BlochSpectrum-np.min(BlochSpectrum),".-")
 plt.plot(np.sort(e_u),".-")
 #plt.plot(e_u+50)
 plt.plot(np.sort(e_u_unfolded),".-")
-#plt.xlim(0,20)
-#plt.ylim(0,20)
+#plt.xlim(0,15)
+plt.ylim(0,92)
+plt.xlabel("Bloch state (index)")
+plt.ylabel("Energy (omega)")
 plt.show()
 
 #%%
@@ -161,10 +185,11 @@ np.savetxt(f, U)
 
 f.close()
 #%%
-f = open("UnfoldingFloquetTEST.dat", "r")
+f = open("UnfoldingFloquetL32Nt2048_N_Band3.dat", "r")
 
-phi_t    = np.loadtxt(f, dtype=complex,max_rows=L,unpack=True).T
-lambda_u = np.loadtxt(f, dtype=complex,max_rows=L,unpack=True)
-e_u      = np.loadtxt(f, dtype=float,max_rows=L,unpack=True)
-U        = np.loadtxt(f, dtype=complex,max_rows=L,unpack=True).T
+phi_t    = np.loadtxt(f, dtype=complex,max_rows=N_Bands*L,unpack=True).T
+lambda_u = np.loadtxt(f, dtype=complex,max_rows=N_Bands*L,unpack=True)
+e_u      = np.loadtxt(f, dtype=float,  max_rows=N_Bands*L,unpack=True)
+U        = np.loadtxt(f, dtype=complex,max_rows=N_Bands*L,unpack=True).T
 
+f.close()
