@@ -97,7 +97,7 @@ def V_box(size=0.5):
 def V_sin(freqs,V0,phi):
     #V0 = 10.0
     #return lambda x : np.sum([cos(2*pi*x*i) for i in range(freqs+1)], axis=0)
-    return lambda x : V0*(0.5 + 0.5*cos(2*pi*x+phi))#np.sum([0.5*cos(2*pi*x*i) for i in [0,1]], axis=0)
+    return lambda x : V0*(0.5 + 0.5*cos(2*pi*x+phi)) #+ V0*(-0.5 + 0.5*cos(2*2*pi*x+phi))# +  + V0*(-0.5 + 0.5*cos(4.41341*2*pi*x+phi))#np.sum([0.5*cos(2*pi*x*i) for i in [0,1]], axis=0)
 
 
 def BlochSpectrum(L=64,m=32,Bands=2,V=1.0,phi = 0):

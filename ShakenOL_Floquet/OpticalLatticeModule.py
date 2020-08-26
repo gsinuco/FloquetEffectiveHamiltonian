@@ -38,9 +38,13 @@ def OL_driving_x(OL,x,t):
 
 def OL_driving(OL,x,t):
     
-    #V = np.cos(t)*x
-    #V = 5.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)
-    V = 0.5*(OL.V_(t)*np.cos(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)) - OL.V)*np.cos(2*2*np.pi*x + 2*OL.phi_x) +  0.5*OL.V_(t)*(1.0 - np.sin(2.0*np.pi*x+2.0*OL.phi_x)*np.sin(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)))
+    
+    #V = 0.5*(OL.V_(t)*np.cos(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)) - OL.V)*np.cos(2*2*np.pi*x + 2*OL.phi_x) +  0.5*OL.V_(t)*(1.0 - np.sin(2.0*np.pi*x+2.0*OL.phi_x)*np.sin(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)))
+
+    if(t>=0 and t < np.pi):        
+        V  = OL.V*0.5*np.cos(2.0*np.pi*x + OL.phi_x) - OL.V*0.5*np.cos(2.0*2.0*np.pi*x + OL.phi_x)
+    else:
+        V  = OL.V*0.5*np.cos(2.0*2.0*np.pi*x + OL.phi_x) - OL.V*0.5*np.cos(2.0*np.pi*x + OL.phi_x)
     return V
 
 def U_t(t,x,OL,U_kn_x):

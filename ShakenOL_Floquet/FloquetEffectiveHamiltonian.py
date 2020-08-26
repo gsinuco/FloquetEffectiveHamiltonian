@@ -43,7 +43,7 @@ def cart2polar(lambda_u,N):
 
     return e_u
 
-def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0):
+def UnfoldingFloquetSpectrum(L=1,dt=1.0,N_t=0,phi_t=0,timedirection=-1):
     # Takes the time-evolution of the Floquet phases, defined with the eigenvalues of
     # the time-evolution operator:
     # Calculate U(t,t_0)
@@ -400,7 +400,7 @@ def FloquetStroboscopicOperatorV3(L=1,N_Bands=1,t0=0,DT=1.0,N_t=0,x=0,OL=0,Bloch
     t = t0
     lambda_u_t = np.zeros(N_Bands*L,dtype=np.complex)
     phi_t      = np.zeros([N_Bands*L,N_t],dtype=np.complex)
-    while solver.successful() and solver.t<=t1  and i_+1<N_t:
+    while solver.successful() and solver.t<=t1  and i_+1<=N_t:
         for j_ in range(int(N_Bands*L)):
             solver.set_initial_value(U_T[:,j_],t).set_f_params(E_0,x,OL,U_x)
             U_T[:,j_] = solver.integrate(solver.t+dt)        
