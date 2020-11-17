@@ -1,0 +1,354 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ShakenOL_Floquet.OpticalLatticeModule &#8212; ShakenOptic 0+untagged.14.gaa02efe.dirty documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ShakenOptic 0+untagged.14.gaa02efe.dirty documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ShakenOL_Floquet.OpticalLatticeModule</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Mon May 18 20:03:38 2020</span>
+
+<span class="sd">@author: german</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<div class="viewcode-block" id="Schrodinger"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.Schrodinger">[docs]</a><span class="k">class</span> <span class="nc">Schrodinger</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">fargs</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_f</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fargs</span><span class="o">=</span><span class="n">fargs</span>
+
+<div class="viewcode-block" id="Schrodinger.f"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.Schrodinger.f">[docs]</a>    <span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_f</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">fargs</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="dl"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.dl">[docs]</a><span class="k">def</span> <span class="nf">dl</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    
+    <span class="k">return</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="phi"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.phi">[docs]</a><span class="k">def</span> <span class="nf">phi</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mf">0.0</span></div>
+
+<div class="viewcode-block" id="V"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.V">[docs]</a><span class="k">def</span> <span class="nf">V</span><span class="p">(</span><span class="n">OL</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">OL</span><span class="o">.</span><span class="n">V</span></div>
+
+<div class="viewcode-block" id="OL_driving_x"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.OL_driving_x">[docs]</a><span class="k">def</span> <span class="nf">OL_driving_x</span><span class="p">(</span><span class="n">OL</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+    
+    <span class="n">V</span> <span class="o">=</span><span class="mf">100.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1">#0.1*x*np.cos(OL.omega*t)#-1.2*np.ones(x.shape[0])#0.000#5*np.cos(2.0*np.pi*x+OL.phi_x)</span>
+    <span class="c1">#V = OL.V*np.cos(OL.k_x*x+OL.phi_x)#0.5*OL.V_(t)*np.cos(2.0*(OL.k_x + OL.DK(t))*x+2.0*(OL.DK(t) + OL.phi_x))</span>
+    <span class="k">return</span> <span class="n">V</span></div>
+
+
+<div class="viewcode-block" id="OL_driving"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.OL_driving">[docs]</a><span class="k">def</span> <span class="nf">OL_driving</span><span class="p">(</span><span class="n">OL</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+    
+    
+    <span class="c1">#V = 0.5*(OL.V_(t)*np.cos(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)) - OL.V)*np.cos(2*2*np.pi*x + 2*OL.phi_x) +  0.5*OL.V_(t)*(1.0 - np.sin(2.0*np.pi*x+2.0*OL.phi_x)*np.sin(2.0*OL.DK(t)*x+2.0*OL.Dphi(t)))</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">t</span><span class="o">&gt;=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">):</span>        
+        <span class="n">V</span>  <span class="o">=</span> <span class="n">OL</span><span class="o">.</span><span class="n">V</span><span class="o">*</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">OL</span><span class="o">.</span><span class="n">phi_x</span><span class="p">)</span> <span class="o">-</span> <span class="n">OL</span><span class="o">.</span><span class="n">V</span><span class="o">*</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">OL</span><span class="o">.</span><span class="n">phi_x</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">V</span>  <span class="o">=</span> <span class="n">OL</span><span class="o">.</span><span class="n">V</span><span class="o">*</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">OL</span><span class="o">.</span><span class="n">phi_x</span><span class="p">)</span> <span class="o">-</span> <span class="n">OL</span><span class="o">.</span><span class="n">V</span><span class="o">*</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">OL</span><span class="o">.</span><span class="n">phi_x</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">V</span></div>
+
+<div class="viewcode-block" id="U_t"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.U_t">[docs]</a><span class="k">def</span> <span class="nf">U_t</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">OL</span><span class="p">,</span><span class="n">U_kn_x</span><span class="p">):</span>
+    <span class="c1"># t : instant of time</span>
+    <span class="c1"># x : np.linspace(x_l,x_r,N_x)</span>
+    <span class="c1"># U_kn: Space representation of the Bloch functions</span>
+    
+    <span class="n">V_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">OL_driving</span><span class="p">(</span><span class="n">OL</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">t</span><span class="p">))</span>
+    <span class="n">U</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">conjugate</span><span class="p">(</span><span class="n">U_kn_x</span><span class="p">))</span><span class="nd">@V_x@U_kn_x</span>
+   <span class="c1"># U   = np.diag(1.0*np.ones(U_kn_x.shape[1]))</span>
+    <span class="k">return</span> <span class="n">U</span></div>
+
+   <span class="c1"># U   = np.abs(np.transpose(np.conjugate(U_kn_x))@U_kn_x)</span>
+    
+<span class="c1">#plt.contourf(np.abs(np.transpose(np.conjugate(U_kn_x))@U_kn_x))</span>
+<span class="c1">#def Schrodinger_RHS(psi,t,E_0,V_0): # for odeint</span>
+<div class="viewcode-block" id="Schrodinger_RHS"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.Schrodinger_RHS">[docs]</a><span class="k">def</span> <span class="nf">Schrodinger_RHS</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">psi</span><span class="p">,</span><span class="n">E_0</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">OL</span><span class="p">,</span><span class="n">U_kn</span><span class="p">):</span> <span class="c1"># for ode</span>
+    <span class="n">t_</span>   <span class="o">=</span> <span class="n">OL</span><span class="o">.</span><span class="n">omega</span><span class="o">*</span><span class="n">t</span>
+    <span class="n">jj</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">H_0</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">E_0</span><span class="p">)</span>
+    <span class="n">V</span>    <span class="o">=</span> <span class="n">U_t</span><span class="p">(</span><span class="n">t_</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">OL</span><span class="p">,</span><span class="n">U_kn</span><span class="p">)</span>
+    <span class="n">H</span>    <span class="o">=</span> <span class="n">H_0</span> <span class="o">+</span> <span class="n">V</span>
+    <span class="c1">#print(t_)</span>
+    <span class="n">dpsidt_RHS</span> <span class="o">=</span> <span class="o">-</span><span class="n">jj</span><span class="o">*</span><span class="n">H</span><span class="nd">@psi</span>
+    
+    <span class="k">return</span> <span class="n">dpsidt_RHS</span></div>
+
+
+<div class="viewcode-block" id="Schrodinger_Momentum_RHS"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.Schrodinger_Momentum_RHS">[docs]</a><span class="k">def</span> <span class="nf">Schrodinger_Momentum_RHS</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">psi</span><span class="p">,</span><span class="n">H_0</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">OL</span><span class="p">,</span><span class="n">U_kn</span><span class="p">):</span> <span class="c1"># for ode</span>
+    <span class="n">t_</span>   <span class="o">=</span> <span class="n">OL</span><span class="o">.</span><span class="n">omega</span><span class="o">*</span><span class="n">t</span>
+    <span class="n">jj</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="c1">#H_0  = np.diag(E_0)</span>
+    <span class="n">V</span>    <span class="o">=</span> <span class="n">U_t</span><span class="p">(</span><span class="n">t_</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">OL</span><span class="p">,</span><span class="n">U_kn</span><span class="p">)</span>
+    <span class="n">H</span>    <span class="o">=</span> <span class="n">H_0</span> <span class="o">+</span> <span class="n">V</span>
+    <span class="c1">#print(t_)</span>
+    <span class="n">dpsidt_RHS</span> <span class="o">=</span> <span class="o">-</span><span class="n">jj</span><span class="o">*</span><span class="n">H</span><span class="nd">@psi</span>
+    
+    <span class="k">return</span> <span class="n">dpsidt_RHS</span></div>
+
+<div class="viewcode-block" id="Schrodinger_RHS_position"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.Schrodinger_RHS_position">[docs]</a><span class="k">def</span> <span class="nf">Schrodinger_RHS_position</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">psi</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">OL</span><span class="p">):</span> <span class="c1"># for ode</span>
+    <span class="n">t_</span>   <span class="o">=</span> <span class="n">OL</span><span class="o">.</span><span class="n">omega</span><span class="o">*</span><span class="n">t</span>
+    <span class="n">jj</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="n">dx</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_0</span>  <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]]))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">dx</span><span class="o">*</span><span class="n">dx</span><span class="p">)</span>
+    <span class="n">V</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">OL_driving_x</span><span class="p">(</span><span class="n">OL</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">t_</span><span class="p">))</span>
+    <span class="n">H</span>    <span class="o">=</span> <span class="n">H_0</span> <span class="o">+</span> <span class="n">V</span>
+    <span class="n">dpsidt_RHS</span> <span class="o">=</span> <span class="o">-</span><span class="n">jj</span><span class="o">*</span><span class="n">H</span><span class="nd">@psi</span>
+    
+    <span class="k">return</span> <span class="n">dpsidt_RHS</span></div>
+
+
+
+
+<div class="viewcode-block" id="OpticalLattice"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.OpticalLattice">[docs]</a><span class="k">class</span> <span class="nc">OpticalLattice</span><span class="p">():</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">V</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">phi_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">omega</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>                
+        <span class="bp">self</span><span class="o">.</span><span class="n">V</span>     <span class="o">=</span> <span class="n">V</span>      <span class="c1"># Depth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k_x</span>   <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phi_x</span> <span class="o">=</span> <span class="n">phi_x</span>  <span class="c1"># phase  V cos^2(kx+phi)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">omega</span> <span class="o">=</span> <span class="n">omega</span>  <span class="c1"># driving frequency</span>
+        
+    
+<div class="viewcode-block" id="OpticalLattice.DK"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.OpticalLattice.DK">[docs]</a>    <span class="k">def</span> <span class="nf">DK</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="n">dl</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">-</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span></div>
+    
+<div class="viewcode-block" id="OpticalLattice.Dphi"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.OpticalLattice.Dphi">[docs]</a>    <span class="k">def</span> <span class="nf">Dphi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">phi</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">phi_x</span></div>
+    
+<div class="viewcode-block" id="OpticalLattice.V_"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.OpticalLattice.V_">[docs]</a>    <span class="k">def</span> <span class="nf">V_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">V</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">t</span><span class="p">)</span></div></div>
+        
+
+<div class="viewcode-block" id="Bloch_spectrum"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.Bloch_spectrum">[docs]</a><span class="k">class</span> <span class="nc">Bloch_spectrum</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">L</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span><span class="n">G</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">L</span>  <span class="o">=</span> <span class="n">L</span>  <span class="c1"># Number of lattice periods, assert it is even ==  number of values of momentum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">G</span>  <span class="o">=</span> <span class="n">G</span>  <span class="c1"># Number of Bands ASSERT G IS ODD</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">G</span><span class="o">*</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">H_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">G</span><span class="p">,(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">G</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="nb">complex</span><span class="p">)</span>
+        <span class="c1">#self.H = np.zeros([G,G],dtype=np.complex)</span>
+    
+<div class="viewcode-block" id="Bloch_spectrum.Spectrum"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.Bloch_spectrum.Spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">Spectrum</span><span class="p">(</span><span class="n">OL</span><span class="p">,</span><span class="bp">self</span><span class="p">):</span>  
+        <span class="c1"># OL input: Optical lattice class</span>
+        <span class="c1"># self input:Bloch_spectrum class</span>
+        <span class="c1">#</span>
+        <span class="c1"># Bloch_energy[i,n] : energy  of the i-th state of the n-th band </span>
+        <span class="c1"># Bloch_wavefun[i*G:(i_+1)*G,n] : wavefunction of the i-th state of the n-th band, with G bands.</span>
+        <span class="n">G</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span>
+        <span class="n">L</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span>
+        <span class="n">V</span>  <span class="o">=</span> <span class="n">OL</span><span class="o">.</span><span class="n">V</span>
+        <span class="n">jj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">Bloch_energy</span>  <span class="o">=</span> <span class="p">[]</span><span class="c1">#np.zeros([G],dtype=np.float)</span>
+        <span class="n">Bloch_wavefun</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">G</span><span class="p">,</span><span class="n">G</span><span class="p">])</span>
+        <span class="n">V_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">G</span><span class="p">,</span><span class="n">G</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+        <span class="n">K</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">G</span><span class="p">,</span><span class="n">G</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+        
+        <span class="c1"># FOR EACH QUASIMOMENTUM (m)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">i_</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">G</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,(</span><span class="n">G</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">G</span><span class="p">):</span>        
+                <span class="n">momentum</span>   <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">*</span><span class="n">m</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">K</span><span class="p">[</span><span class="n">i_</span><span class="p">,</span><span class="n">i_</span><span class="p">]</span>   <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">momentum</span><span class="o">*</span><span class="n">momentum</span> <span class="c1"># KINETIC ENERGY </span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">i_</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="n">G</span><span class="p">):</span>
+                    <span class="n">V_</span><span class="p">[</span><span class="n">i_</span><span class="p">,</span><span class="n">i_</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">V</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">jj</span><span class="o">*</span><span class="n">OL</span><span class="o">.</span><span class="n">phi_x</span><span class="p">)</span> <span class="c1">#0.125   # POTENTIAL ENERGY         </span>
+                    <span class="n">V_</span><span class="p">[</span><span class="n">i_</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">i_</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">V</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">jj</span><span class="o">*</span><span class="n">OL</span><span class="o">.</span><span class="n">phi_x</span><span class="p">)</span> <span class="c1">#0.125   # POTENTIAL ENERGY         </span>
+               <span class="c1"># if (i_+2 &lt; G):</span>
+               <span class="c1">#     V_[i_,i_+2] = 2.25*V#0.125   # POTENTIAL ENERGY         </span>
+               <span class="c1">#     V_[i_+2,i_] = 2.25*V#0.125   # POTENTIAL ENERGY         </span>
+               <span class="c1"># if (i_+3 &lt; G):</span>
+               <span class="c1">#     V_[i_,i_+3] = 0.25*V#0.125   # POTENTIAL ENERGY         </span>
+               <span class="c1">#     V_[i_+3,i_] = 0.25*V#0.125   # POTENTIAL ENERGY         </span>
+
+                <span class="n">i_</span><span class="o">=</span><span class="n">i_</span><span class="o">+</span><span class="mi">1</span>      
+                
+            <span class="n">H</span>  <span class="o">=</span> <span class="n">K</span> <span class="o">+</span> <span class="n">V_</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">H_0</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">m</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">G</span><span class="p">):</span><span class="nb">int</span><span class="p">((</span><span class="n">m</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">G</span><span class="p">),</span><span class="nb">int</span><span class="p">((</span><span class="n">m</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">G</span><span class="p">):</span><span class="nb">int</span><span class="p">((</span><span class="n">m</span><span class="o">+</span><span class="nb">int</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">G</span><span class="p">)]</span> <span class="o">=</span> <span class="n">H</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">m</span> <span class="o">==</span> <span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">):</span>
+                <span class="n">Bloch_energy</span><span class="p">,</span><span class="n">Bloch_wavefun</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Bloch_energy</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">Bloch_energy</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">H</span><span class="p">)[</span><span class="mi">0</span><span class="p">]],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>     
+                <span class="n">Bloch_wavefun</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">Bloch_wavefun</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">H</span><span class="p">)[</span><span class="mi">1</span><span class="p">]],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>     
+            
+        <span class="n">Bloch_energy</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Bloch_energy</span><span class="p">,[</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">G</span><span class="p">])</span>            
+
+        <span class="k">return</span> <span class="n">Bloch_energy</span><span class="p">,</span><span class="n">Bloch_wavefun</span></div>
+    
+    <span class="c1">#def RealSpaceWavefun(self,x_l,x_r,N_x,BlochWavefun):</span>
+<div class="viewcode-block" id="Bloch_spectrum.RealSpaceWavefun"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.OpticalLatticeModule.Bloch_spectrum.RealSpaceWavefun">[docs]</a>    <span class="k">def</span> <span class="nf">RealSpaceWavefun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">BlochWavefun</span><span class="p">):</span>
+        <span class="c1"># self         : Bloch_Spectrum class</span>
+        <span class="c1"># x            : domanin of the wave function</span>
+        <span class="c1"># BlochWavefun : Momentum decoposition of the Floquet states</span>
+        <span class="c1"># </span>
+        <span class="c1"># OUT</span>
+        <span class="c1">#</span>
+        <span class="c1"># RealSpaceBlochfun[i_*N_x:(i_+1)*N_x,n]: Wavefunction of the i-th state of the n-th band</span>
+        
+        <span class="n">Bands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">G</span>
+        <span class="n">L</span>     <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span>
+        <span class="n">N_x</span>   <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># BlochWavefun[m,n]</span>
+        <span class="c1"># Fourier component of the Bloch wavefunction corresponding to the factor</span>
+        <span class="c1">#</span>
+        <span class="c1"># exp(i 2 np.pi m/(L a) ) exp(-i 2 np.pi n/a)</span>
+        <span class="c1"># </span>
+        <span class="c1"># i.e. the wavefunction is:</span>
+        <span class="c1">#</span>
+        <span class="c1"># psi_{m,n}(x) = exp(i 2 np.pi m/(L a) ) sum_{n}  BlochWavefun[m,n]  exp(-i 2 np.pi n/a)</span>
+
+        <span class="n">i_</span><span class="o">=</span> <span class="mi">0</span>
+        <span class="n">jj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+
+        <span class="n">k</span>      <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">Bands</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,(</span><span class="n">Bands</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="n">Bands</span><span class="p">)</span>
+        <span class="c1">#x      = np.linspace(x_l,x_r,N_x)</span>
+        <span class="c1">#kk, xx = np.meshgrid(k, x, sparse=False)</span>
+        <span class="c1"># array of factors: exp(-i 2 np.pi n/a x)</span>
+        <span class="c1">#phases = np.exp(-jj*kk*xx)</span>
+        <span class="c1">#n=0</span>
+        <span class="c1">#RealSpaceBlochfun = phases@BlochWavefun[n*Bands:(n+1)*Bands,0:Bands]</span>
+        <span class="c1">#for n in range(L):</span>
+        <span class="c1">#    RealSpaceBlochfun_ = phases@BlochWavefun[(n+1)*Bands:(n+2)*Bands,0:Bands]</span>
+        <span class="c1">#    RealSpaceBlochfun  = np.concatenate((RealSpaceBlochfun,RealSpaceBlochfun_),axis=0)</span>
+        <span class="c1">#print(RealSpaceBlochfun.shape)</span>
+            
+        <span class="n">RealSpaceBlochfun</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N_x</span><span class="o">*</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="n">Bands</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+        <span class="n">RealSpaceMomentumfun</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N_x</span><span class="o">*</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="n">Bands</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># loop over the values of momentum in the BZ</span>
+            <span class="n">RealSpaceBlochfun_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N_x</span><span class="p">,</span><span class="n">Bands</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+            <span class="n">RealSpaceMomentumfun_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">N_x</span><span class="p">,</span><span class="n">Bands</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">i_</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Bands</span><span class="p">):</span> <span class="c1"># loo over the number of bands</span>
+                <span class="n">n_</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="p">(</span><span class="n">Bands</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+                <span class="c1">#print(m)</span>
+                <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span>
+                    <span class="n">momentum</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">momentum</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="nb">int</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">momentum</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="nb">int</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> 
+                        <span class="n">momentum</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="nb">int</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">momentum</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">-</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">momentum</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">momentum</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span> <span class="o">+</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">momentum</span> <span class="o">=</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">momentum</span>  <span class="o">+</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">L</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1">#print(L,i_,n,m,n_,momentum)#,momentum/np.pi)        </span>
+                <span class="c1">#if n=0 :</span>
+                <span class="c1">#    momentum = 2.0*np.pi*(m/L) + (n-1)*np.pi</span>
+                <span class="c1">#momentum = momentum/np.pi </span>
+                <span class="c1">#momentum = (1.0*m/L - n_)</span>
+                <span class="c1">#print(m,n,momentum/np.pi)#,momentum/np.pi)        </span>
+                <span class="k">for</span> <span class="n">m_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Bands</span><span class="p">):</span> <span class="c1">#sum_m exp(-i k_m x) U_{i_,m,n}</span>
+                    <span class="n">RealSpaceBlochfun_</span><span class="p">[:,</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">RealSpaceBlochfun_</span><span class="p">[:,</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="n">BlochWavefun</span><span class="p">[</span><span class="n">i_</span><span class="o">*</span><span class="n">Bands</span><span class="o">+</span><span class="n">m_</span><span class="p">,</span><span class="n">n</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">jj</span><span class="o">*</span><span class="n">k</span><span class="p">[</span><span class="n">m_</span><span class="p">]</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+                    
+                <span class="c1">#RealSpaceBlochfun_[:,n] = momentum*np.ones(x.shape[0])</span>
+                <span class="n">RealSpaceBlochfun_</span><span class="p">[:,</span><span class="n">n</span><span class="p">]</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">jj</span><span class="o">*</span><span class="n">momentum</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">RealSpaceBlochfun_</span><span class="p">[:,</span><span class="n">n</span><span class="p">]</span>     
+                <span class="n">RealSpaceMomentumfun_</span><span class="p">[:,</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">jj</span><span class="o">*</span><span class="n">momentum</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="n">RealSpaceBlochfun</span><span class="p">[</span><span class="n">i_</span><span class="o">*</span><span class="n">N_x</span><span class="p">:(</span><span class="n">i_</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">N_x</span><span class="p">,:]</span>    <span class="o">=</span> <span class="n">RealSpaceBlochfun_</span>
+            <span class="n">RealSpaceMomentumfun</span><span class="p">[</span><span class="n">i_</span><span class="o">*</span><span class="n">N_x</span><span class="p">:(</span><span class="n">i_</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">N_x</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">RealSpaceMomentumfun_</span>
+
+                        
+        <span class="c1">#RealSpaceWF =np.zeros([N_x*(L+1),Bands],dtype=np.complex)</span>
+        <span class="c1">#RealSpaceWF_=np.empty([N_x,Bands],dtype=np.complex)</span>
+        <span class="c1">#for m in np.linspace(-L/2,L/2,L+1):</span>
+        <span class="c1">#   i_ = int(m + L/2)</span>
+        <span class="c1">#   for n in range(Bands): </span>
+               <span class="c1">#TO DO: TEST THAT THE MOMENTUM IS GIVEN BY               </span>
+        <span class="c1">#       momentum   = 2.0*np.pi*(np.power(-1.0,n)*m/(1.0*L) + n)</span>
+        <span class="c1">#       RealSpaceWF_[:,n]= RealSpaceBlochfun[i_*N_x:(i_+1)*N_x,n]#np.exp(jj*momentum*x)*RealSpaceBlochfun[i_*N_x:(i_+1)*N_x,n]</span>
+               
+         <span class="c1">#  if m==-L/2 :</span>
+         <span class="c1">#      RealSpaceWF = RealSpaceWF_    </span>
+         <span class="c1">#  else:</span>
+         <span class="c1">#      RealSpaceWF = np.concatenate([RealSpaceWF,RealSpaceWF_],axis=0)     </span>
+           
+        <span class="k">return</span> <span class="n">RealSpaceBlochfun</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">RealSpaceMomentumfun</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="c1">#RealSpaceWF</span></div></div>
+
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ShakenOptic 0+untagged.14.gaa02efe.dirty documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, German Sinuco.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

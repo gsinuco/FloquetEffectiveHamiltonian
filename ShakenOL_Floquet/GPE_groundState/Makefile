@@ -1,0 +1,32 @@
+#export LD_LIBRARY_PATH="/opt/intel/compilers_and_libraries/linux/mkl/lib/intel64:../../lib/"
+TOPSRCDIR = ./
+include $(TOPSRCDIR)/make.inc
+
+
+############################
+# TEST
+############################
+
+BUILD_DIR = ./build
+TEST_DIR  = ./
+
+test_sources:= $(wildcard $(TEST_DIR)/*.f90)
+test_executables:= $(patsubst $(TEST_DIR)/%.f90, $(BUILD_DIR)/%, $(test_sources))
+run_executables:= $(patsubst $(TEST_DIR)/%.f90, $(TEST_LIST)/%, $(test_sources))
+
+$(BUILD_DIR)/%: $(TEST_DIR)/%.f90
+	$(GF) -c $<  $(GFFLAGS) $(MKLFLAGS)  
+
+
+$(TEST_LIST)/%: $(BUILD_DIR)/%
+	./$<
+
+.PHONY: test
+test: $(test_executables)
+
+.PHONY : run_test
+run_test: $(run_executables)
+
+.PHONY : clean_test
+clean_test: 
+	rm $(test_executables)

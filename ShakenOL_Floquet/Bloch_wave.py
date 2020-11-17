@@ -22,8 +22,11 @@ def get_H(N, L, V_period):
 
     x = np.linspace(0, L, N)
     dx = L / N
-
-    H[1::3] = 2/dx**2 + V_period(x%1) # diagonal elements of the Hamiltonian
+    if(isinstance(V_period, np.ndarray)):
+        H[1::3] = 2/dx**2 + V_period    # diagonal elements of the Hamiltonian
+    else:
+        H[1::3] = 2/dx**2 + V_period(x) # diagonal elements of the Hamiltonian
+    
     H[0::3] = H[2::3] = -1/dx**2 * np.ones_like(x) # off diagonal elements of the H
     I[1::3] = J[1::3] = I[0::3] = I[2::3] = np.arange(0, N)
     J[0::3] = (np.arange(0, N) - 1)%N
@@ -52,6 +55,7 @@ def get_k(v_i, m):
 # Get eigen-vecs/vals of potential wiht v_period repeated L times,
 # and periodic bondaryconditions. Returns numVec values/vectors. 
 def get_eigen(N, L, numVec, V_period):
+    #print(V_period.shape)
     print("numVec = {}, N = {}".format(numVec, N))
     print("Making hamiltonian")
     H = get_H(N, L, V_period)
@@ -96,29 +100,76 @@ def V_box(size=0.5):
 
 def V_sin(freqs,V0,phi):
     #V0 = 10.0
-    #return lambda x : np.sum([cos(2*pi*x*i) for i in range(freqs+1)], axis=0)
-    return lambda x : V0*(0.5 + 0.5*cos(2*pi*x+phi)) #+ V0*(-0.5 + 0.5*cos(2*2*pi*x+phi))# +  + V0*(-0.5 + 0.5*cos(4.41341*2*pi*x+phi))#np.sum([0.5*cos(2*pi*x*i) for i in [0,1]], axis=0)
+    #return lambda x : np.sum([cos(2*pi*x*i) for i in range(freqs+1)], axis=0)    
+    return lambda x : 0.5*V0 + 0.25*V0*(cos(2.0*pi*x+phi)+ cos(4.0*pi*x+phi))
+        #0.5*V0*(2.0*cos(2*pi*x+phi)*cos(2*pi*x+phi) + 0.0*cos(2*2*pi*x+phi)*cos(2*2*pi*x+phi)) 
+
+def beta_n_p(n=2.0,p=4.0):
+    limits = 1024
+    m     = np.linspace(-limits,-1,limits)
+    m_    = np.linspace(1,limits,limits)
+    beta  = (2*n*n*(1-np.cos(2*pi*m/n)) -2.0*n*(2.0-2.0*np.cos(m*pi*(1.0+1.0/n) )*np.cos(m*pi*(1.0-1.0/n))) )/np.power(m,p)
+    beta_ = (2*n*n*(1-np.cos(2*pi*m_/n))-2.0*n*(2.0-2.0*np.cos(m_*pi*(1.0+1.0/n))*np.cos(m_*pi*(1.0-1.0/n))))/np.power(m_,p)
+    return (np.sum(beta)+np.sum(beta_))/np.power(2*np.pi*n,2.0)
+
+
+
+def V_sin_array(freqs,V0,phi,omega,phi_0,phi_1):
+    print(freqs)
+    if(freqs == 0):
+        return lambda x : 0.5*V0 + 0.5*V0*cos(4.0*pi*x+phi) # t \in [0,T/2)
+    if(freqs == 1):
+        return lambda x : 0.5*V0 + 0.5*V0*cos(2.0*pi*x+phi) # t \in [t/2,T)
+    if(freqs == 2):
+        return lambda x : 0.5*V0 + 0.25*V0*(cos(4.0*pi*x+phi)+ cos(2.0*pi*x+phi)) # V average
+    if(freqs == 3):
+        #H_F_3 =  beta_n_p(2.0,4.0)*0.5*np.power((V0/omega)*(-np.sin(2.0*pi*x+2.0*phi_0) + g*np.sin(2.0*2.0*pi*x+2.0*phi_1)),2.0)
+        g = 2
+        return lambda x :   0.5*V0 + 0.25*V0*(cos(4.0*pi*x+phi)+ cos(2.0*pi*x+phi)) + beta_n_p(2.0,4.0)*0.5*np.power((V0/omega)*(-np.sin(2.0*pi*x+2.0*phi_0) + g*np.sin(2.0*2.0*pi*x+2.0*phi_1)),2.0)
 
 
 def BlochSpectrum(L=64,m=32,Bands=2,V=1.0,phi = 0):
     #L = 64 # Number of periods in lattice
     #m = 32 # Number of points in a period
+
     n = 2
     N = m*L
     numVec = Bands*L
-    #n = 1
     x = np.linspace(0, L, N)
 
     Vs = [V_sin(i,V,phi) for i in range(n)]
     for i in [n-2]:#range(n-1):
         l, v = get_eigen(N, L, numVec, Vs[i])
-        #k_u = plot_eigenvals(l, v, m, "vals_{}".format(i))
-        #plt.show()
-        #plot_eigenvecs(v, 4, N, L, Vs[i], "vecs_{}".format(i))
-        #plt.plot(x,Vs[i](x))
-        #plt.show()
     return l,v
+
+
+def BlochSpectrum_array(L=64,m=32,Bands=2,V=1.0,phi = 0,omega=10):
+    #L = 64 # Number of periods in lattice
+    #m = 32 # Number of points in a period
+
+    n = 4
+    N = m*L
+    numVec = Bands*L
+    x = np.linspace(0, L, N)
+    phi_0 = 0
+    phi_1 = 0
     
+    l_ =  np.empty([1],dtype=np.double)
+    v_ =  np.zeros([1,numVec],dtype=np.complex)
+    
+    Vs = [V_sin_array(i,V,phi,omega,phi_0,phi_1) for i in range(n)]
+    for i in range(n):
+        l, v = get_eigen(N, L, numVec, Vs[i])
+        #plot_eigenvals(l, v, m, "vals_{}".format(i))        
+        #plot_eigenvecs(v, 4, N, L, Vs[i], "vecs_{}".format(i))
+        l_ = np.append(l_,l,axis=0)
+        v_ = np.append(v_,v,axis=0)
+        #plt.plot(Vs[i](x%1))
+        #plt.show()
+    return l_,v_
+
+
+
 #L     = 32
 #N_x   = 32
 #Bands = 3

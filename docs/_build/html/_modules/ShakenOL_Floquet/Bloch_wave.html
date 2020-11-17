@@ -1,0 +1,257 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ShakenOL_Floquet.Bloch_wave &#8212; ShakenOptic 0+untagged.14.gaa02efe.dirty documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ShakenOptic 0+untagged.14.gaa02efe.dirty documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ShakenOL_Floquet.Bloch_wave</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri May 29 15:18:05 2020</span>
+
+<span class="sd">@author: german</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">pi</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="k">import</span> <span class="n">coo_matrix</span>
+<span class="kn">from</span> <span class="nn">scipy.sparse.linalg</span> <span class="k">import</span> <span class="n">eigsh</span>
+<span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">progress.bar</span> <span class="k">import</span> <span class="n">Bar</span>
+
+
+<span class="c1"># Returns a hameltoninan modulated by V_period L times</span>
+<div class="viewcode-block" id="get_H"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.get_H">[docs]</a><span class="k">def</span> <span class="nf">get_H</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">V_period</span><span class="p">):</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+    <span class="n">I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">J</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">L</span> <span class="o">/</span> <span class="n">N</span>
+
+    <span class="n">H</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">/</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">V_period</span><span class="p">(</span><span class="n">x</span><span class="o">%</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># diagonal elements of the Hamiltonian</span>
+    <span class="n">H</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">dx</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># off diagonal elements of the H</span>
+    <span class="n">I</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">J</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">I</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">J</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">N</span>
+    <span class="n">J</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="n">N</span>
+    
+    <span class="k">return</span> <span class="n">coo_matrix</span><span class="p">((</span><span class="n">H</span><span class="p">,</span> <span class="p">(</span><span class="n">I</span><span class="p">,</span> <span class="n">J</span><span class="p">)))</span></div>
+
+<span class="c1"># The eigenspace for each energy is degenerate, with one right and one left moving wave</span>
+<span class="c1"># for each E. This changes the pasis from having u_k*cos(kx), u_k*sin(k0) to u_k*exp(\pm ikx)</span>
+<div class="viewcode-block" id="change_basis"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.change_basis">[docs]</a><span class="k">def</span> <span class="nf">change_basis</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+    <span class="n">v_new</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">complex_</span><span class="p">)</span>
+    <span class="n">v_new</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">//</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">v_new</span><span class="p">[:,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">v_new</span><span class="p">[:,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span><span class="o">*</span><span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">v_new</span></div>
+
+
+<span class="c1"># The energy eigenstates are also eigenstates of the translation vector T_n, </span>
+<span class="c1"># where T_n psi_k(x) = psi_k(a*n+x). With T_n psi_k(x) = exp(ikna)psi_k(x) </span>
+<span class="c1"># =&gt; k = arg(pis_k(x)/psi(k+a))/a. Here, a = 1, f(a) = f[m]</span>
+<div class="viewcode-block" id="get_k"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.get_k">[docs]</a><span class="k">def</span> <span class="nf">get_k</span><span class="p">(</span><span class="n">v_i</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">v_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span> <span class="n">v_i</span><span class="p">[</span><span class="n">m</span><span class="p">])</span></div>
+
+
+<span class="c1"># Get eigen-vecs/vals of potential wiht v_period repeated L times,</span>
+<span class="c1"># and periodic bondaryconditions. Returns numVec values/vectors. </span>
+<div class="viewcode-block" id="get_eigen"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.get_eigen">[docs]</a><span class="k">def</span> <span class="nf">get_eigen</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">numVec</span><span class="p">,</span> <span class="n">V_period</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;numVec = </span><span class="si">{}</span><span class="s2">, N = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">numVec</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Making hamiltonian&quot;</span><span class="p">)</span>
+    <span class="n">H</span> <span class="o">=</span> <span class="n">get_H</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">V_period</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Finding eigenvalues&quot;</span><span class="p">)</span>
+    <span class="n">l</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">eigsh</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">numVec</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;SM&quot;</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">change_basis</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">l</span><span class="p">,</span> <span class="n">v</span></div>
+
+<div class="viewcode-block" id="plot_eigenvals"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.plot_eigenvals">[docs]</a><span class="k">def</span> <span class="nf">plot_eigenvals</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+    <span class="n">numVec</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">numVec</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numVec</span><span class="p">):</span>
+        <span class="n">k</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_k</span><span class="p">(</span><span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">m</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;figs/&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span><span class="s2">&quot;.png&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">k</span></div>
+
+
+<span class="c1"># plots the n first vectors of v</span>
+<div class="viewcode-block" id="plot_eigenvecs"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.plot_eigenvecs">[docs]</a><span class="k">def</span> <span class="nf">plot_eigenvecs</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">N</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">V_period</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">ax2</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ax</span><span class="p">]</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">real</span><span class="p">)</span>
+        <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">imag</span><span class="p">)</span>
+        <span class="n">ax2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">V_period</span><span class="p">(</span><span class="n">x</span><span class="o">%</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;k--&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s2">&quot;figs/&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span></div>
+
+    
+<span class="c1"># Potentials to repeat</span>
+<div class="viewcode-block" id="V_box"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.V_box">[docs]</a><span class="k">def</span> <span class="nf">V_box</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="n">V0</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">sides</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">size</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">V</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">x</span><span class="o">&gt;</span><span class="n">sides</span><span class="p">,</span> <span class="n">x</span><span class="o">&lt;</span><span class="p">(</span><span class="n">sides</span><span class="o">+</span><span class="n">size</span><span class="p">))</span>
+    <span class="n">V</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">V0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">V</span></div>
+
+<div class="viewcode-block" id="V_sin"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.V_sin">[docs]</a><span class="k">def</span> <span class="nf">V_sin</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">V0</span><span class="p">,</span><span class="n">phi</span><span class="p">):</span>
+    <span class="c1">#V0 = 10.0</span>
+    <span class="c1">#return lambda x : np.sum([cos(2*pi*x*i) for i in range(freqs+1)], axis=0)    </span>
+    <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">V0</span> <span class="o">+</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">V0</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span><span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="mf">4.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">))</span></div>
+        <span class="c1">#0.5*V0*(2.0*cos(2*pi*x+phi)*cos(2*pi*x+phi) + 0.0*cos(2*2*pi*x+phi)*cos(2*2*pi*x+phi)) </span>
+
+<div class="viewcode-block" id="beta_n_p"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.beta_n_p">[docs]</a><span class="k">def</span> <span class="nf">beta_n_p</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="mf">4.0</span><span class="p">):</span>
+    <span class="n">limits</span> <span class="o">=</span> <span class="mi">1024</span>
+    <span class="n">m</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">limits</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">limits</span><span class="p">)</span>
+    <span class="n">m_</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">limits</span><span class="p">,</span><span class="n">limits</span><span class="p">)</span>
+    <span class="n">beta</span>  <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">m</span><span class="o">/</span><span class="n">n</span><span class="p">))</span> <span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="mf">2.0</span><span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n</span><span class="p">)</span> <span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">m</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n</span><span class="p">)))</span> <span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">m</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">beta_</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">m_</span><span class="o">/</span><span class="n">n</span><span class="p">))</span><span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="mf">2.0</span><span class="o">-</span><span class="mf">2.0</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">m_</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">+</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n</span><span class="p">))</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">m_</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="mf">1.0</span><span class="o">/</span><span class="n">n</span><span class="p">))))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">m_</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">beta_</span><span class="p">))</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">n</span><span class="p">,</span><span class="mf">2.0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="V_sin_array"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.V_sin_array">[docs]</a><span class="k">def</span> <span class="nf">V_sin_array</span><span class="p">(</span><span class="n">freqs</span><span class="p">,</span><span class="n">V0</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">omega</span><span class="p">,</span><span class="n">phi_0</span><span class="p">,</span><span class="n">phi_1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">freqs</span><span class="p">)</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">freqs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">V0</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">V0</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mf">4.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span> <span class="c1"># t \in [0,T/2)</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">freqs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">V0</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">V0</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span> <span class="c1"># t \in [t/2,T)</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">freqs</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">V0</span> <span class="o">+</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">V0</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="mf">4.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span><span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">))</span> <span class="c1"># V average</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">freqs</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="c1">#H_F_3 =  beta_n_p(2.0,4.0)*0.5*np.power((V0/omega)*(-np.sin(2.0*pi*x+2.0*phi_0) + g*np.sin(2.0*2.0*pi*x+2.0*phi_1)),2.0)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="k">lambda</span> <span class="n">x</span> <span class="p">:</span>   <span class="mf">0.5</span><span class="o">*</span><span class="n">V0</span> <span class="o">+</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">V0</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="mf">4.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">)</span><span class="o">+</span> <span class="n">cos</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="n">phi</span><span class="p">))</span> <span class="o">+</span> <span class="n">beta_n_p</span><span class="p">(</span><span class="mf">2.0</span><span class="p">,</span><span class="mf">4.0</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">((</span><span class="n">V0</span><span class="o">/</span><span class="n">omega</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="mf">2.0</span><span class="o">*</span><span class="n">phi_0</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="mf">2.0</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="o">+</span><span class="mf">2.0</span><span class="o">*</span><span class="n">phi_1</span><span class="p">)),</span><span class="mf">2.0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BlochSpectrum"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.BlochSpectrum">[docs]</a><span class="k">def</span> <span class="nf">BlochSpectrum</span><span class="p">(</span><span class="n">L</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span><span class="n">m</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span><span class="n">Bands</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">V</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">phi</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="c1">#L = 64 # Number of periods in lattice</span>
+    <span class="c1">#m = 32 # Number of points in a period</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">m</span><span class="o">*</span><span class="n">L</span>
+    <span class="n">numVec</span> <span class="o">=</span> <span class="n">Bands</span><span class="o">*</span><span class="n">L</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
+    <span class="n">Vs</span> <span class="o">=</span> <span class="p">[</span><span class="n">V_sin</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">phi</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">]:</span><span class="c1">#range(n-1):</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">get_eigen</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">numVec</span><span class="p">,</span> <span class="n">Vs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">l</span><span class="p">,</span><span class="n">v</span></div>
+
+
+<div class="viewcode-block" id="BlochSpectrum_array"><a class="viewcode-back" href="../../ShakenOL_Floquet.html#ShakenOL_Floquet.Bloch_wave.BlochSpectrum_array">[docs]</a><span class="k">def</span> <span class="nf">BlochSpectrum_array</span><span class="p">(</span><span class="n">L</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span><span class="n">m</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span><span class="n">Bands</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">V</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span><span class="n">phi</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="c1">#L = 64 # Number of periods in lattice</span>
+    <span class="c1">#m = 32 # Number of points in a period</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">m</span><span class="o">*</span><span class="n">L</span>
+    <span class="n">numVec</span> <span class="o">=</span> <span class="n">Bands</span><span class="o">*</span><span class="n">L</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">phi_0</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">phi_1</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">l_</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="mi">1</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">)</span>
+    <span class="n">v_</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="n">numVec</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex</span><span class="p">)</span>
+    
+    <span class="n">Vs</span> <span class="o">=</span> <span class="p">[</span><span class="n">V_sin_array</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">V</span><span class="p">,</span><span class="n">phi</span><span class="p">,</span><span class="n">omega</span><span class="p">,</span><span class="n">phi_0</span><span class="p">,</span><span class="n">phi_1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">l</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">get_eigen</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">numVec</span><span class="p">,</span> <span class="n">Vs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="c1">#plot_eigenvals(l, v, m, &quot;vals_{}&quot;.format(i))        </span>
+        <span class="c1">#plot_eigenvecs(v, 4, N, L, Vs[i], &quot;vecs_{}&quot;.format(i))</span>
+        <span class="n">l_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">l_</span><span class="p">,</span><span class="n">l</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">v_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v_</span><span class="p">,</span><span class="n">v</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1">#plt.plot(Vs[i](x%1))</span>
+        <span class="c1">#plt.show()</span>
+    <span class="k">return</span> <span class="n">l_</span><span class="p">,</span><span class="n">v_</span></div>
+    
+<span class="c1">#L     = 32</span>
+<span class="c1">#N_x   = 32</span>
+<span class="c1">#Bands = 3</span>
+<span class="c1">#V     = 30</span>
+<span class="c1">#phi   = pi/4.0</span>
+<span class="c1">#l,v = BlochSpectrum(L,N_x,Bands,V,phi)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">ShakenOptic 0+untagged.14.gaa02efe.dirty documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, German Sinuco.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+    </div>
+  </body>
+</html>

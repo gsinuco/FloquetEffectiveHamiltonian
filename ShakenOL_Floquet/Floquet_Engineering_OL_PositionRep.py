@@ -50,7 +50,7 @@ BlochSpectrum,RealSpaceBlochWavefun = BW.BlochSpectrum(L,N_x,Bands,V_0,2.0*phase
 
 k_u = np.empty(Bands*L)
 for i in range(Bands*L):
-    k_u[i] = BW.get_k(RealSpaceBlochWavefun[:, i], N_x)
+    k_u[i] = BW.get_k(RealSpaceBlochWavefun[1:, i], N_x)
 
 plt.plot(k_u,BlochSpectrum,".")
 #plt.plot(k_u,k_u*k_u,".")
