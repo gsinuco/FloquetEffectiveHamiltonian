@@ -72,7 +72,7 @@ T      = (2.0*pi)/omega # Period of the driving
 
 # Set the parameter of the sequence of static optical lattices parametrised by
 # V(x) = (V_0/2) (cos(k_x  x  +  2.0*phase) + 1)
-M      =  4
+M      =  1
 DeltaT = np.array([T],dtype=np.double) # List of durations
 #DeltaT = np.array([T/4.0,     T/4.0, T/4.0,T/4.0],dtype=np.double) # List of durations
 V_m    = np.array([20.0],dtype=np.double)
@@ -92,8 +92,8 @@ Vs    = [V_OL_array(i,V_m,k_m,phi_m) for i in range(M)] # Make a list of  OL fun
 L     = 64 # number of unit cells
 N_x   = 64 # Number of points in a unit cell
 x     = np.linspace(0, L, N_x*L)
-for i in range(M):
-    plt.plot(x[0:128],Vs[i](x)[0:128])
+#for i in range(M):
+#    plt.plot(x[0:128],Vs[i](x)[0:128])
 
 plt.xlabel("x")
 plt.title("Optical lattice contributions")

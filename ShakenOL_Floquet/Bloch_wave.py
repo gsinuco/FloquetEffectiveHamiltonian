@@ -14,13 +14,14 @@ from matplotlib import pyplot as plt
 from progress.bar import Bar
 
 
-# Returns a hameltoninan modulated by V_period L times
+# Returns a Hamiltoninan modulated by V_period L times
 def get_H(N, L, V_period):
     H = np.empty(3*N, dtype=np.float)
     I = np.empty(3*N, dtype=int)
     J = np.empty(3*N, dtype=int)
 
-    x = np.linspace(0, L, N)
+    #x = np.linspace(0, L, N)
+    x = np.linspace(-L/2, L/2, N)
     dx = L / N
     if(isinstance(V_period, np.ndarray)):
         H[1::3] = 2/dx**2 + V_period    # diagonal elements of the Hamiltonian
@@ -29,19 +30,19 @@ def get_H(N, L, V_period):
     
     H[0::3] = H[2::3] = -1/dx**2 * np.ones_like(x) # off diagonal elements of the H
     I[1::3] = J[1::3] = I[0::3] = I[2::3] = np.arange(0, N)
-    J[0::3] = (np.arange(0, N) - 1)%N
-    J[2::3] = (np.arange(0, N) + 1)%N
+    J[0::3] = (np.arange(0, N) - 1)%(N)
+    J[2::3] = (np.arange(0, N) + 1)%(N)
     
     return coo_matrix((H, (I, J)))
 
 # The eigenspace for each energy is degenerate, with one right and one left moving wave
-# for each E. This changes the pasis from having u_k*cos(kx), u_k*sin(k0) to u_k*exp(\pm ikx)
+# for each E. This function changes the basis from having u_k*cos(kx), u_k*sin(k0) to u_k*exp(\pm ikx)
 def change_basis(v):
     v_new = np.empty_like(v, dtype = np.complex_)
     v_new[:, 0] = v[:, 0]
     for i in range(1, len(v[0])//2 - 1):
         v_new[:, 2*i - 1] = v[:, 2*i] + 1j*v[:, 2*i-1]
-        v_new[:, 2*i] = v[:, 2*i] - 1j*v[:, 2*i-1]
+        v_new[:, 2*i]     = v[:, 2*i] - 1j*v[:, 2*i-1]
     return v_new
 
 
@@ -104,6 +105,9 @@ def V_sin(freqs,V0,phi):
     return lambda x : 0.5*V0 + 0.25*V0*(cos(2.0*pi*x+phi)+ cos(4.0*pi*x+phi))
         #0.5*V0*(2.0*cos(2*pi*x+phi)*cos(2*pi*x+phi) + 0.0*cos(2*2*pi*x+phi)*cos(2*2*pi*x+phi)) 
 
+def V_OL_trap(i,V0,omega_trap,phi):
+    return lambda x : 0.5*V0 + 0.5*V0*(cos(2.0*pi*x+phi)) + 0.5*omega_trap*(x**2)
+
 def beta_n_p(n=2.0,p=4.0):
     limits = 1024
     m     = np.linspace(-limits,-1,limits)
@@ -138,6 +142,21 @@ def BlochSpectrum(L=64,m=32,Bands=2,V=1.0,phi = 0):
     x = np.linspace(0, L, N)
 
     Vs = [V_sin(i,V,phi) for i in range(n)]
+    for i in [n-2]:#range(n-1):
+        l, v = get_eigen(N, L, numVec, Vs[i])
+    return l,v
+
+
+def Spectrum(L=64,m=32,Bands=2,V=1.0,phi = 0,omega_trap=0.0):
+    #L = 64 # Number of periods in lattice
+    #m = 32 # Number of points in a period
+
+    n = 2
+    N = m*L
+    numVec = Bands*L
+    x = np.linspace(0, L, N)
+
+    Vs = [V_OL_trap(i,V,omega_trap,phi) for i in range(n)]
     for i in [n-2]:#range(n-1):
         l, v = get_eigen(N, L, numVec, Vs[i])
     return l,v

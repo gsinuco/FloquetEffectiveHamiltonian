@@ -67,7 +67,7 @@ plt.show()
 ########  SCHRODINGER EQUATION ##################################
 #################################################################
 # Solve the Schrodinger equation for a subset of the bands:
-N_Bands = 32    # number of bands to include in the Schrodinger equation
+N_Bands = 1    # number of bands to include in the Schrodinger equation
 N_t     = 2048#512 # number of time steps
 
 t0   = 0                 # initial time
